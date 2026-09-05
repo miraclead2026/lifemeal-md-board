@@ -222,12 +222,28 @@ body:not(.report) #report{display:none}
 .pb .nm{font-weight:700;font-size:13.5px;color:var(--text);display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
 .pb .tag{font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:3px;background:#EEF1F5;color:#5B6472;white-space:nowrap}
 .pb.draft .tag{background:#F3F4F6;color:#6B7280}
+.pb .th{font-size:12px;color:#92400E;margin-top:2px;white-space:normal}
+.pb.draft .th{color:#6B7280}
 .pb .pd{font-size:12.5px;color:#3D4756;margin-top:3px;white-space:normal}
 .pb .bf{font-size:12px;color:var(--muted);margin-top:2px;white-space:normal}
 .pb.cont{padding:4px 9px;background:transparent;border-style:dashed;border-left-style:solid;opacity:.85}
 .pb.cont .nm{font-size:12.5px;font-weight:600;color:var(--muted)}
 .rp-note{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 18px;border-top:1px solid #CBD2DC;background:#FFFBEB;color:#92400E;font-size:12.5px;line-height:1.5}
 @media print{ body.report .topbar{display:none!important} body.report .report{margin:0;border:0} .rp-scroll{max-height:none;overflow:visible} .rp-head .acts{display:none} .wtable td.cell .add{display:none} }
+/* compact detail */
+.dtag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:3px;background:#EEF1F5;color:#5B6472;vertical-align:middle;margin-left:6px}
+.dtag.live{background:#E9F7EE;color:#166534}.dtag.fix{background:#FFF4E2;color:#92400E}.dtag.draft{background:#F3F4F6;color:#6B7280;border:1px dashed #AAB3C0}
+.dv2 .dgrid{display:grid;grid-template-columns:120px 1fr;gap:12px 16px;padding:14px 0 4px;font-size:14px}
+.dv2 .dk{color:var(--muted);font-size:13px;padding-top:2px}
+.dv2 .dvv{line-height:1.5}
+.dv2 .dp{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px dashed var(--line2)}
+.dv2 .dp:last-child{border-bottom:0}
+.dv2 .dp .n{font-weight:500}
+.dv2 .dp .pr{color:var(--muted);white-space:nowrap}
+.dv2 .dp .pr b{color:var(--text);font-weight:600}
+.dv2 .dp .pr em{font-style:normal;color:var(--danger);font-weight:600;margin-left:2px}
+.dv2 .dp.gift .n{color:#92400E}
+.dv2 .cl label{padding:3px 0;font-size:13.5px}
 /* quick form */
 .qf .fg{grid-template-columns:repeat(12,1fr)}
 .qf .plist{max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:var(--radius);padding:4px 8px;display:grid;grid-template-columns:1fr 1fr;gap:2px 12px}
@@ -927,7 +943,7 @@ function renderReport(){
       const items = rows.filter(p=>p.channelId===c.id && w.idx>=p._sp.a && w.idx<=p._sp.b).sort((a,b)=>a._sp.a-b._sp.a);
       h += `<td class="cell" data-ch="${c.id}" data-w="${w.idx}">`;
       items.forEach(p=>{ const g=REPORT_GROUP[p.status]||'draft'; const first = w.idx===p._sp.a; const pd=reportProduct(p);
-        if(first) h += `<div class="pb ${g}" data-id="${p.id}"><div class="nm">${esc(p.name)}<span class="tag">${REPORT_LABEL[g]}</span>${p._sp.b>p._sp.a?`<span class="tag">~${WEEKS[p._sp.b].month}월 ${WEEKS[p._sp.b].week}주</span>`:''}</div>${pd?`<div class="pd">${esc(pd)}</div>`:'<div class="pd" style="color:var(--faint)">상품 미정</div>'}${p.benefit?`<div class="bf">${esc(p.benefit)}</div>`:''}</div>`;
+        if(first) h += `<div class="pb ${g}" data-id="${p.id}"><div class="nm">${esc(p.name)}<span class="tag">${REPORT_LABEL[g]}</span>${p._sp.b>p._sp.a?`<span class="tag">~${WEEKS[p._sp.b].month}월 ${WEEKS[p._sp.b].week}주</span>`:''}</div>${p.theme?`<div class="th">${esc(p.theme)}</div>`:''}${pd?`<div class="pd">${esc(pd)}</div>`:'<div class="pd" style="color:var(--faint)">상품 미정</div>'}${p.benefit?`<div class="bf">${esc(p.benefit)}</div>`:''}</div>`;
         else h += `<div class="pb ${g} cont" data-id="${p.id}"><div class="nm">${esc(p.name)} <span class="tag">계속</span></div></div>`; });
       h += `<span class="add">+ 추가</span></td>`;
     });
@@ -945,33 +961,42 @@ function renderReport(){
 /* 간단 등록: 기획전명 · 채널 · 주차 · 상품 · 혜택 · 상태만. 나머지는 상세에서 */
 function openQuickForm(pre){
   pre=pre||{};
-  const wi = pre.weekIdx!=null ? pre.weekIdx : Math.max(0, weekIndexOf(todayISO())||0);
+  const E = pre.edit ? normalizePromotion(pre.edit) : null; const esp = E ? spanOf(E) : null;
+  const wi = esp ? esp.a : (pre.weekIdx!=null ? pre.weekIdx : Math.max(0, weekIndexOf(todayISO())||0));
+  const wb = esp ? esp.b : wi;
+  const selIds = new Set(E ? saleLines(E).map(l=>l.productId).filter(x=>x&&x!=='__manual') : []);
+  const manualNames = E ? saleLines(E).filter(l=>!l.productId||l.productId==='__manual').map(l=>l.name).filter(Boolean) : [];
+  if(E) pre.channelId = E.channelId;
   const prods = activeSorted(S.products).filter(p=>p.type!=='event');
   const cats = Array.from(new Set(prods.map(p=>p.category||'기타')));
-  const ov = openModal(`<div class="mh"><div><h2>기획전 추가</h2><div class="sub">필요한 것만 적고 저장하세요. 예산·체크리스트 같은 상세는 나중에 상자를 눌러 채우면 됩니다.</div></div><span class="spacer"></span><button type="button" class="btn sm ghost" data-close>닫기</button></div>
+  const ov = openModal(`<div class="mh"><div><h2>${E?'기획전 수정':'기획전 추가'}</h2><div class="sub">필요한 것만 적고 저장하세요. 예산·체크리스트 같은 상세는 "자세히"에서 채우면 됩니다.</div></div><span class="spacer"></span><button type="button" class="btn sm ghost" data-close>닫기</button></div>
     <div class="mb qf"><div class="fg" style="margin-top:12px">
-      <div class="f s8"><label>기획전명 <span class="req">*</span></label><input type="text" id="qName" placeholder="예: 빼빼로데이 스틱 기획전" autofocus></div>
+      <div class="f s8"><label>기획전명 <span class="req">*</span></label><input type="text" id="qName" value="${esc(E?E.name:'')}" placeholder="예: 빼빼로데이 스틱 기획전" autofocus></div>
       <div class="f s4"><label>채널 <span class="req">*</span></label><select id="qCh">${activeSorted(S.channels).map(c=>`<option value="${c.id}" ${c.id===pre.channelId?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
       <div class="f s3"><label>시작 주차</label><select id="qA">${WEEKS.map(w=>`<option value="${w.idx}" ${w.idx===wi?'selected':''}>${w.month}월 ${w.week}주 (${w.range})</option>`).join('')}</select></div>
-      <div class="f s3"><label>종료 주차</label><select id="qB">${WEEKS.map(w=>`<option value="${w.idx}" ${w.idx===wi?'selected':''}>${w.month}월 ${w.week}주 (${w.range})</option>`).join('')}</select></div>
-      <div class="f s3"><label>상태</label><select id="qSt"><option value="검토 중">초안 (검토 중)</option><option value="기획 중">확정 (기획 중)</option><option value="진행 중">진행 중</option></select></div>
-      <div class="f s3"><label>담당자</label><input type="text" id="qOwner" value="${esc(pre.owner||'')}" placeholder="이름"></div>
-      <div class="f s12"><label>판매 상품 <span class="hint">(여러 개 선택 가능 · 목록에 없으면 아래 직접 입력)</span></label><div class="plist" id="qProds">${cats.map(cat=>`<div class="cat">${esc(cat)}</div>`+prods.filter(p=>(p.category||'기타')===cat).map(p=>`<label><input type="checkbox" value="${p.id}"> ${esc(p.name)} <span class="note">${fmt(masterPrice(p))}원</span></label>`).join('')).join('')}</div>
-        <input type="text" id="qManual" placeholder="직접 입력 상품 (쉼표로 구분)" style="margin-top:6px"></div>
-      <div class="f s12"><label>핵심 혜택 한 줄 <span class="hint">(예: 2개 구매 시 15% 할인 + 쿨백 증정)</span></label><input type="text" id="qBenefit"></div>
+      <div class="f s3"><label>종료 주차</label><select id="qB">${WEEKS.map(w=>`<option value="${w.idx}" ${w.idx===wb?'selected':''}>${w.month}월 ${w.week}주 (${w.range})</option>`).join('')}</select></div>
+      <div class="f s3"><label>상태</label><select id="qSt">${[['검토 중','초안 (검토 중)'],['기획 중','확정 (기획 중)'],['진행 예정','확정 (진행 예정)'],['진행 중','진행 중'],['완료','완료'],['보류','보류'],['취소','취소']].map(([v,l])=>`<option value="${v}" ${E&&E.status===v?'selected':''}>${l}</option>`).join('')}</select></div>
+      <div class="f s3"><label>담당자</label><input type="text" id="qOwner" value="${esc(E?E.owner:(pre.owner||''))}" placeholder="이름"></div>
+      <div class="f s12"><label>테마 · 키워드 <span class="hint">(한 줄: 예 "환절기 · 아침 루틴 · 면역")</span></label><input type="text" id="qTheme" value="${esc(E?(E.theme||''):'')}" placeholder="이 기획전을 한마디로"></div>
+      <div class="f s12"><label>판매 상품 <span class="hint">(여러 개 선택 가능 · 목록에 없으면 아래 직접 입력)</span></label><div class="plist" id="qProds">${cats.map(cat=>`<div class="cat">${esc(cat)}</div>`+prods.filter(p=>(p.category||'기타')===cat).map(p=>`<label><input type="checkbox" value="${p.id}" ${selIds.has(p.id)?'checked':''}> ${esc(p.name)} <span class="note">${fmt(masterPrice(p))}원</span></label>`).join('')).join('')}</div>
+        <input type="text" id="qManual" value="${esc(manualNames.join(', '))}" placeholder="직접 입력 상품 (쉼표로 구분)" style="margin-top:6px"></div>
+      <div class="f s12"><label>핵심 혜택 한 줄 <span class="hint">(예: 2개 구매 시 15% 할인 + 쿨백 증정)</span></label><input type="text" id="qBenefit" value="${esc(E?E.benefit:'')}"></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:14px;align-items:center"><button type="button" class="btn primary" id="qSave">저장</button><button type="button" class="btn" id="qMore">상세 입력으로 이동</button><span class="err" id="qErr"></span></div></div>`, {narrow:true});
   $('#qA',ov).addEventListener('change', ()=>{ if(Number($('#qB',ov).value) < Number($('#qA',ov).value)) $('#qB',ov).value=$('#qA',ov).value; });
   function build(){
     const name=$('#qName',ov).value.trim(); if(!name){ $('#qErr',ov).textContent='기획전명을 입력하세요'; $('#qName',ov).focus(); return null; }
     const a=Number($('#qA',ov).value), b=Math.max(a, Number($('#qB',ov).value));
-    const d = newPromotion({channelId:$('#qCh',ov).value, start:WEEKS[a].start, end:WEEKS[b].end});
-    d.name=name; d.status=$('#qSt',ov).value; d.owner=$('#qOwner',ov).value.trim(); d.benefit=$('#qBenefit',ov).value.trim();
+    const d = E ? clone(E) : newPromotion({channelId:$('#qCh',ov).value, start:WEEKS[a].start, end:WEEKS[b].end});
+    if(E){ d.channelId=$('#qCh',ov).value; if(!esp || a!==esp.a) d.start=WEEKS[a].start; if(!esp || b!==esp.b) d.end=WEEKS[b].end; }
+    d.name=name; d.status=$('#qSt',ov).value; d.owner=$('#qOwner',ov).value.trim(); d.benefit=$('#qBenefit',ov).value.trim(); d.theme=$('#qTheme',ov).value.trim();
+    const keepGifts = E ? giftLines(E) : [];
     d.products = $$('#qProds input:checked',ov).map(cb=>{ const p=productById(cb.value); const it=normalizeLine({kind:p.type==='set'?'set':'single'}); it.productId=p.id; it.name=p.name; it.price=String(masterPrice(p)); it.comp=p.spec||''; if(p.type==='set'){ it.components=clone(p.components||[]); it.comp=compText(it.components); } it.discType='pct'; return it; });
-    $('#qManual',ov).value.split(',').map(s=>s.trim()).filter(Boolean).forEach(nm=>{ const it=normalizeLine({kind:'single'}); it.productId='__manual'; it.name=nm; it.discType='pct'; d.products.push(it); });
+    $('#qManual',ov).value.split(',').map(s=>s.trim()).filter(Boolean).forEach(nm=>{ const old = E ? saleLines(E).find(l=>(!l.productId||l.productId==='__manual') && l.name===nm) : null; if(old){ d.products.push(clone(old)); return; } const it=normalizeLine({kind:'single'}); it.productId='__manual'; it.name=nm; it.discType='pct'; d.products.push(it); });
+    if(E){ d.products = d.products.map(it=>{ const old=saleLines(E).find(l=>l.productId===it.productId && it.productId!=='__manual'); return old?Object.assign(clone(old),{name:it.name}):it; }).concat(keepGifts); }
     return d;
   }
-  $('#qSave',ov).addEventListener('click', async ()=>{ const d=build(); if(!d) return; d.id=uid('pr'); d.updatedAt=new Date().toISOString(); await S.store.put('promotions', clone(d)); closeModal(ov); toast('기획전을 추가했습니다'); });
+  $('#qSave',ov).addEventListener('click', async ()=>{ const d=build(); if(!d) return; if(!E) d.id=uid('pr'); d.updatedAt=new Date().toISOString(); await S.store.put('promotions', clone(d)); closeModal(ov); toast(E?'저장했습니다':'기획전을 추가했습니다'); });
   $('#qMore',ov).addEventListener('click', ()=>{ const d=build(); if(!d) return; closeModal(ov); openForm(d); });
 }
 async function saveReportImage(){
@@ -1091,7 +1116,7 @@ function newPromotion(pre){
   pre = pre||{};
   const w = pre.weekIdx!=null ? WEEKS[pre.weekIdx] : null;
   return { id:null, name:'', channelId: pre.channelId || (activeSorted(S.channels)[0]||{}).id || '', start: w?w.start:pre.start||`${YEAR}-09-01`, end: w?w.end:pre.end||`${YEAR}-09-07`,
-    status:'아이디어', owner:'', deadline:'', criteriaIds:[], purposeIds:[], bg:{why:'',whyChannel:'',link:'',behavior:''},
+    status:'아이디어', owner:'', deadline:'', theme:'', criteriaIds:[], purposeIds:[], bg:{why:'',whyChannel:'',link:'',behavior:''},
     target:'', products:[], gift:'', coupon:'', benefit:'',
     goal:{sales:'',qty:'',ad:'',discount:'',giftCost:'',prod:'',fee:'',logistics:'',etc:''},
     checklist: sorted(S.checklist).map(c=>({id:uid('ci'),tplId:c.id,name:c.name,done:false})),
@@ -1132,6 +1157,7 @@ function openForm(promo, opts){
         <div class="f s6"><label>해당 월 · 주차 (자동 계산)</label><div class="calc" id="cWeek"></div></div>
         <div class="f s3"><label>담당자</label><input type="text" data-k="owner" value="${esc(d.owner)}" list="ownerList" placeholder="이름"></div>
         <div class="f s3"><label>내부 마감일</label><input type="date" data-k="deadline" value="${esc(d.deadline)}"></div>
+        <div class="f s12"><label>테마 · 키워드 <span class="hint">(한 줄: 예 "환절기 · 아침 루틴 · 면역")</span></label><input type="text" data-k="theme" value="${esc(d.theme||'')}" placeholder="이 기획전을 한마디로"></div>
         <div class="f s6"><label>동시 진행 확인</label><div class="calc" id="cConc"></div></div>
       </div>
       <datalist id="ownerList">${Array.from(new Set(S.promotions.map(p=>(p.owner||'').trim()).filter(Boolean))).map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
@@ -1429,60 +1455,66 @@ function openDetail(id){
   const p0 = S.promotions.find(x=>x.id===id); if(!p0) return;
   const p = normalizePromotion(p0);
   const ch = byId(S.channels,p.channelId); const b=budgetOf(p); const pr=checklistProgress(p); const sp=spanOf(p);
-  const crit = p.criteriaIds.map(i=>byId(S.criteria,i)).filter(Boolean); const pur = p.purposeIds.map(i=>byId(S.purposes,i)).filter(Boolean);
-  const wl = sp ? (sp.a===sp.b ? `${WEEKS[sp.a].month}월 ${WEEKS[sp.a].week}주차` : `${WEEKS[sp.a].month}월 ${WEEKS[sp.a].week}주차 ~ ${WEEKS[sp.b].month}월 ${WEEKS[sp.b].week}주차`) : '캘린더 범위 밖';
+  const grp = REPORT_GROUP[p.status]||'draft';
+  const wl = sp ? (sp.a===sp.b ? `${WEEKS[sp.a].month}월 ${WEEKS[sp.a].week}주` : `${WEEKS[sp.a].month}월 ${WEEKS[sp.a].week}주 ~ ${WEEKS[sp.b].month}월 ${WEEKS[sp.b].week}주`) : '캘린더 범위 밖';
+  const md = (s)=> `${Number(s.slice(5,7))}/${Number(s.slice(8,10))}`;
+  const sales = saleLines(p).filter(x=>x.name), gifts = giftLines(p).filter(x=>x.name);
+  const prodRows = sales.map(x=>{ const a=num(x.price), s=lineSalePrice(x), pct=lineDiscPct(x); const hasDeal = a && s<a; return `<div class="dp"><span class="n">${esc(shortProd(x.name))}</span><span class="pr">${a?fmt(a)+'원':''}${hasDeal?` <b>→ ${fmt(s)}원</b> <em>${pct}%</em>`:''}</span></div>`; }).join('');
+  const giftRows = gifts.map(g=>`<div class="dp gift"><span class="n">사은품 · ${esc(shortProd(g.name))}</span><span class="pr">${esc(g.cond||'')}</span></div>`).join('');
+  const todo = p.checklist.filter(c=>!c.done).slice(0,4);
+  const crit = p.criteriaIds.map(i=>byId(S.criteria,i)).filter(Boolean);
   const kv = (k,v)=> `<dt>${k}</dt><dd>${v||'<span class="note">-</span>'}</dd>`;
   const ov = openModal(`
-    <div class="mh"><div><h2>${esc(p.name)}</h2><div class="sub">${esc(ch?ch.name:'-')} · ${p.start} ~ ${p.end} · ${wl}</div></div><span class="spacer"></span>${statusPill(p.status)}<button type="button" class="btn sm ghost" data-close>닫기</button></div>
-    <div class="mb dv">
-      <div class="actions" style="padding:12px 0 4px">
-        <button type="button" class="btn primary" id="dEdit">수정</button>
-        <button type="button" class="btn" id="dDup">복제</button>
+    <div class="mh"><div><h2>${esc(p.name)} <span class="tag dtag ${grp}">${REPORT_LABEL[grp]}</span></h2><div class="sub">${esc(ch?ch.name:'-')} · ${md(p.start)} ~ ${md(p.end)} (${wl})${p.owner?' · '+esc(p.owner):''}</div></div><span class="spacer"></span><button type="button" class="btn sm ghost" data-close>닫기</button></div>
+    <div class="mb dv2">
+      <div class="dgrid">
+        <div class="dk">테마 · 키워드</div><div class="dvv">${p.theme?esc(p.theme):(crit.length?esc(crit.map(c=>c.name).join(' · ')):'<span class="note">미정</span>')}</div>
+        <div class="dk">판매 상품</div><div class="dvv">${prodRows||'<span class="note">상품 미정</span>'}${giftRows}</div>
+        <div class="dk">혜택</div><div class="dvv">${p.benefit?esc(p.benefit):'<span class="note">미정</span>'}${p.coupon?`<div class="note">쿠폰 · ${esc(p.coupon)}</div>`:''}</div>
+        ${(b.total>0||b.sales>0)?`<div class="dk">예산 · 목표</div><div class="dvv">${b.total>0?`투입 예산 ${won(b.total)}`:''}${b.sales>0?`${b.total>0?' · ':''}목표 매출 ${won(b.sales)}`:''}${b.roas!=null?` · ROAS ${b.roas.toFixed(1)}배`:''}</div>`:''}
+        ${todo.length?`<div class="dk">다음 할 일</div><div class="dvv"><div class="cl" id="dTodo">${todo.map(c=>{ const i=p.checklist.indexOf(c); return `<label><input type="checkbox" data-i="${i}"><span>${esc(c.name)}</span></label>`; }).join('')}${pr?`<div class="note">${pr.done}/${pr.total} 완료</div>`:''}</div></div>`:''}
+      </div>
+      <div class="actions" style="padding:14px 0 6px;border-top:1px solid var(--line2);margin-top:12px">
+        <button type="button" class="btn primary" id="dQuick">수정</button>
         <label class="note">상태 <select id="dStatus" style="padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface)">${STATUSES.map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}</select></label>
+        <button type="button" class="btn" id="dDup">복제</button>
+        <button type="button" class="btn ghost" id="dMore">자세히 (예산 · 체크리스트 · 메모)</button>
         <span class="spacer"></span>
         <button type="button" class="btn" id="dArch">${p.archived?'보관 해제':'보관'}</button>
         <button type="button" class="btn danger" id="dDel">삭제</button><span id="dDelConfirm"></span>
       </div>
-      <div class="move"><span class="note">이동</span>
-        <select id="mvCh">${sorted(S.channels).filter(c=>c.active!==false||c.id===p.channelId).map(c=>`<option value="${c.id}" ${c.id===p.channelId?'selected':''}>${esc(c.name)}</option>`).join('')}</select>
-        <select id="mvWk"><option value="">주차 유지</option>${WEEKS.map(w=>`<option value="${w.idx}" ${sp&&sp.a===w.idx?'selected':''}>${w.month}월 ${w.week}주차 (${w.range})</option>`).join('')}</select>
-        <span class="note">시작일 <input type="date" id="mvStart" value="${p.start}" style="padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></span>
-        <span class="note">종료일 <input type="date" id="mvEnd" value="${p.end}" style="padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></span>
-        <button type="button" class="btn sm" id="mvGo">적용</button>
-        <span class="note">주차를 고르면 기간 길이를 유지한 채 시작 주차로 이동합니다. 캘린더에서 카드를 끌어다 놓아도 됩니다.</span>
+      <div id="dFull" hidden class="dv">
+        <div class="actions" style="padding:8px 0"><button type="button" class="btn sm" id="dEdit">상세 입력창에서 수정</button></div>
+        <h4>기획 배경</h4>
+        <dl class="kv">${kv('왜 지금', esc(p.bg.why))}${kv('왜 이 채널', esc(p.bg.whyChannel))}${kv('시즌 · 상품 연결', esc(p.bg.link))}${kv('기대 고객 행동', esc(p.bg.behavior))}${kv('대상 고객', esc(p.target))}${kv('기획전 목적', esc(p.purposeIds.map(i=>(byId(S.purposes,i)||{}).name).filter(Boolean).join(', ')))}${kv('내부 마감일', p.deadline)}</dl>
+        <h4>상품 상세</h4>
+        <div style="overflow-x:auto"><table class="ltable num" style="min-width:0;font-size:12px"><thead><tr><th>유형</th><th>상품</th><th>구성</th><th class="r">정상 단가</th><th class="r">행사가</th><th class="r">할인율</th><th class="r">재고</th><th class="r">목표 수량</th></tr></thead><tbody>
+          ${sales.map(x=>{ const a=num(x.price), s=lineSalePrice(x), pct=lineDiscPct(x); return `<tr><td>${x.kind==='set'?'세트':'일반'}</td><td>${esc(x.name)}</td><td class="wrap">${esc(x.comp)}</td><td class="r">${a?fmt(a):'-'}</td><td class="r">${fmt(s)}</td><td class="r">${pct!=null?pct+'%':'-'}</td><td class="r">${x.stock!==''?fmt(x.stock):'-'}</td><td class="r">${x.qty!==''?fmt(x.qty):'-'}</td></tr>`; }).join('') || '<tr><td colspan="8" class="note">등록된 판매 상품이 없습니다.</td></tr>'}
+        </tbody></table></div>
+        ${gifts.length?`<div style="overflow-x:auto;margin-top:8px"><table class="ltable num" style="min-width:0;font-size:12px"><thead><tr><th>이벤트 · 사은품</th><th class="r">주문당 수량</th><th class="r">단위 원가</th><th>지급 조건</th></tr></thead><tbody>${gifts.map(g=>`<tr><td>${esc(g.name)}</td><td class="r">${fmt(g.qty||1)}</td><td class="r">${fmt(g.cost)}</td><td class="wrap">${esc(g.cond)}</td></tr>`).join('')}</tbody></table></div>`:''}
+        <h4>예산 (행사 추가 투입 비용만)</h4>
+        <table class="bud num"><tr><td>목표 매출</td><td>${won(b.sales)}</td></tr><tr><td>광고비</td><td>${won(p.goal.ad)}</td></tr><tr><td>쿠폰 · 할인 분담금</td><td>${won(p.goal.discount)}</td></tr><tr><td>사은품 구매비</td><td>${won(p.goal.giftCost)}</td></tr><tr><td>디자인 · 콘텐츠 제작비</td><td>${won(p.goal.prod)}</td></tr><tr><td>기획전 구좌 · 노출 비용</td><td>${won(p.goal.fee)}</td></tr><tr><td>추가 물류비</td><td>${won(p.goal.logistics)}</td></tr><tr><td>기타 비용</td><td>${won(p.goal.etc)}</td></tr><tr class="tot"><td>총예산</td><td>${won(b.total)}</td></tr><tr><td>예상 ROAS</td><td>${b.roas!=null?b.roas.toFixed(2)+'배':'-'}</td></tr></table>
+        <h4>체크리스트 ${pr?`<span class="note">${pr.done}/${pr.total} 완료</span>`:''}</h4>
+        <div class="cl" id="dCl">${p.checklist.map((c,i)=>`<label class="${c.done?'done':''}"><input type="checkbox" data-i="${i}" ${c.done?'checked':''}><span>${esc(c.name)}</span></label>`).join('')||'<span class="note">항목 없음</span>'}</div>
+        <div class="move"><span class="note">이동</span>
+          <select id="mvCh">${sorted(S.channels).filter(c=>c.active!==false||c.id===p.channelId).map(c=>`<option value="${c.id}" ${c.id===p.channelId?'selected':''}>${esc(c.name)}</option>`).join('')}</select>
+          <span class="note">시작일 <input type="date" id="mvStart" value="${p.start}" style="padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></span>
+          <span class="note">종료일 <input type="date" id="mvEnd" value="${p.end}" style="padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></span>
+          <button type="button" class="btn sm" id="mvGo">적용</button></div>
+        <h4>메모</h4>
+        <dl class="kv">${kv('내부 메모', esc(p.memo))}${kv('채널 담당자 연락', esc(p.contact))}${kv('참고 링크', p.links.map(l=>`<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.title||l.url)}</a>`).join('<br>'))}</dl>
+        <p class="note" style="margin-top:14px">만든 날짜 ${(p.createdAt||'').slice(0,10)} · 마지막 수정 ${(p.updatedAt||'').replace('T',' ').slice(0,16)}</p>
       </div>
-      <h4>기본 정보</h4>
-      <dl class="kv">${kv('기획전 기준', crit.map(c=>`<span class="tag" style="--tc:${c.color}">${esc(c.name)}</span>`).join(' '))}${kv('기획전 목적', esc(pur.map(x=>x.name).join(', ')))}${kv('담당자', esc(p.owner))}${kv('내부 마감일', p.deadline)}${kv('대상 고객', esc(p.target))}</dl>
-      <h4>기획 배경</h4>
-      <dl class="kv">${kv('왜 지금', esc(p.bg.why))}${kv('왜 이 채널', esc(p.bg.whyChannel))}${kv('시즌 · 상품 연결', esc(p.bg.link))}${kv('기대 고객 행동', esc(p.bg.behavior))}</dl>
-      <h4>상품 및 혜택</h4>
-      <div style="overflow-x:auto"><table class="ltable num" style="min-width:0;font-size:12px"><thead><tr><th>유형</th><th>상품</th><th>구성</th><th class="r">정상 단가</th><th class="r">행사가</th><th class="r">할인율</th><th class="r">재고</th><th class="r">목표 수량</th><th class="r">목표 금액</th></tr></thead><tbody>
-        ${saleLines(p).filter(x=>x.name).map(x=>{ const a=num(x.price), s=lineSalePrice(x), pct=lineDiscPct(x); return `<tr><td>${x.kind==='set'?'세트':'일반'}</td><td>${esc(x.name)}</td><td class="wrap">${esc(x.comp)}</td><td class="r">${a?fmt(a):'-'}</td><td class="r">${fmt(s)}</td><td class="r">${pct!=null?pct+'%':'-'}</td><td class="r">${x.stock!==''?fmt(x.stock):'-'}</td><td class="r">${x.qty!==''?fmt(x.qty):'-'}</td><td class="r">${x.qty!==''?fmt(s*num(x.qty)):'-'}</td></tr>`; }).join('') || '<tr><td colspan="9" class="note">등록된 판매 상품이 없습니다.</td></tr>'}
-      </tbody></table></div>
-      ${giftLines(p).length?`<div style="overflow-x:auto;margin-top:8px"><table class="ltable num" style="min-width:0;font-size:12px"><thead><tr><th>이벤트 · 사은품</th><th class="r">주문당 수량</th><th class="r">단위 원가</th><th>지급 조건</th><th class="r">준비 수량</th></tr></thead><tbody>${giftLines(p).map(g=>`<tr><td>${esc(g.name)}</td><td class="r">${fmt(g.qty||1)}</td><td class="r">${fmt(g.cost)}</td><td class="wrap">${esc(g.cond)}</td><td class="r">${g.stock!==''?fmt(g.stock):'-'}</td></tr>`).join('')}</tbody></table></div>`:''}
-      <dl class="kv" style="margin-top:8px">${kv('사은품', esc(p.gift))}${kv('쿠폰 · 포인트', esc(p.coupon))}${kv('핵심 고객 혜택', esc(p.benefit))}</dl>
-      <h4>목표 및 예산</h4>
-      <table class="bud num"><tr><td>목표 매출</td><td>${won(b.sales)}</td></tr><tr><td>목표 판매수량</td><td>${p.goal.qty!==''?fmt(p.goal.qty)+'개':'-'}</td></tr>
-        <tr><td>광고비</td><td>${won(p.goal.ad)}</td></tr><tr><td>쿠폰 · 할인 분담금</td><td>${won(p.goal.discount)}</td></tr><tr><td>사은품 구매비</td><td>${won(p.goal.giftCost)}</td></tr><tr><td>디자인 · 콘텐츠 제작비</td><td>${won(p.goal.prod)}</td></tr><tr><td>기획전 구좌 · 노출 비용</td><td>${won(p.goal.fee)}</td></tr><tr><td>추가 물류비</td><td>${won(p.goal.logistics)}</td></tr><tr><td>기타 비용</td><td>${won(p.goal.etc)}</td></tr>
-        <tr class="tot"><td>총예산</td><td>${won(b.total)}</td></tr><tr><td>예상 잔여금액</td><td style="${b.remain<0?'color:var(--danger)':''}">${won(b.remain)}</td></tr><tr><td>예상 ROAS</td><td>${b.roas!=null?b.roas.toFixed(2)+'배':'-'}</td></tr></table>
-      <h4>실행 준비 항목 ${pr?`<span class="note">${pr.done}/${pr.total} 완료</span>`:''}</h4>
-      <div class="cl" id="dCl">${p.checklist.map((c,i)=>`<label class="${c.done?'done':''}"><input type="checkbox" data-i="${i}" ${c.done?'checked':''}><span>${esc(c.name)}</span></label>`).join('')||'<span class="note">항목 없음</span>'}</div>
-      <h4>메모 및 첨부</h4>
-      <dl class="kv">${kv('내부 메모', esc(p.memo))}${kv('채널 담당자 연락', esc(p.contact))}${kv('참고 링크', p.links.map(l=>`<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.title||l.url)}</a>`).join('<br>'))}${kv('첨부', p.files.map(f=> f.dataUrl && (f.type||'').startsWith('image/') ? `<img src="${f.dataUrl}" alt="${esc(f.name)}" style="max-width:160px;max-height:120px;border:1px solid var(--line);border-radius:4px;margin:2px 4px 2px 0;vertical-align:top">` : `<span>${esc(f.name)}</span>`).join(' '))}</dl>
-      <p class="note" style="margin-top:14px">만든 날짜 ${(p.createdAt||'').slice(0,10)} · 마지막 수정 ${(p.updatedAt||'').replace('T',' ').slice(0,16)}</p>
     </div>`);
+  $('#dQuick',ov).addEventListener('click', ()=>{ closeModal(ov); openQuickForm({edit:p}); });
   $('#dEdit',ov).addEventListener('click', ()=>{ closeModal(ov); openForm(p); });
+  $('#dMore',ov).addEventListener('click', ()=>{ const f=$('#dFull',ov); f.hidden=!f.hidden; $('#dMore',ov).textContent = f.hidden ? '자세히 (예산 · 체크리스트 · 메모)' : '간단히'; });
   $('#dDup',ov).addEventListener('click', ()=>{ closeModal(ov); duplicatePromotion(p); });
   $('#dStatus',ov).addEventListener('change', async e=>{ p.status=e.target.value; await savePromotion(p); toast('상태를 변경했습니다'); closeModal(ov); openDetail(p.id); });
-  $('#dArch',ov).addEventListener('click', async ()=>{ p.archived=!p.archived; await savePromotion(p); toast(p.archived?'보관했습니다 (필터에서 "보관 기획전 표시"로 확인)':'보관을 해제했습니다'); closeModal(ov); });
+  $('#dArch',ov).addEventListener('click', async ()=>{ p.archived=!p.archived; await savePromotion(p); toast(p.archived?'보관했습니다':'보관을 해제했습니다'); closeModal(ov); });
   $('#dDel',ov).addEventListener('click', ()=>{ const c=$('#dDelConfirm',ov); c.innerHTML=`<span class="confirm">정말 삭제할까요? <button type="button" class="btn xs danger" id="dDelYes">삭제</button><button type="button" class="btn xs ghost" id="dDelNo">취소</button></span>`; $('#dDelYes',ov).addEventListener('click', async ()=>{ await S.store.remove('promotions', p.id); closeModal(ov); toast('삭제했습니다'); }); $('#dDelNo',ov).addEventListener('click', ()=>{ c.innerHTML=''; }); });
-  $('#mvGo',ov).addEventListener('click', async ()=>{
-    const chId=$('#mvCh',ov).value, wk=$('#mvWk',ov).value, st=$('#mvStart',ov).value, en=$('#mvEnd',ov).value;
-    const o = {channelId:chId};
-    if(st!==p.start || en!==p.end){ o.start=st; o.end=en; } else if(wk!=='' && Number(wk)!==(sp?sp.a:-1)) o.weekIdx=Number(wk);
-    const n = await movePromotion(p, o); toast('이동했습니다'); closeModal(ov); openDetail(n.id);
-  });
-  $$('#dCl input',ov).forEach(cb=>cb.addEventListener('change', async ()=>{ p.checklist[Number(cb.dataset.i)].done=cb.checked; cb.parentElement.classList.toggle('done',cb.checked); await savePromotion(p); }));
+  $('#mvGo',ov).addEventListener('click', async ()=>{ const o={channelId:$('#mvCh',ov).value, start:$('#mvStart',ov).value, end:$('#mvEnd',ov).value}; const n=await movePromotion(p,o); toast('이동했습니다'); closeModal(ov); openDetail(n.id); });
+  $$('#dCl input, #dTodo input',ov).forEach(cb=>cb.addEventListener('change', async ()=>{ p.checklist[Number(cb.dataset.i)].done=cb.checked; cb.parentElement.classList.toggle('done',cb.checked); await savePromotion(p); }));
 }
 
 /* ---------------- 캘린더 이벤트 (위임) ---------------- */
