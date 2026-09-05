@@ -236,9 +236,11 @@ body:not(.report) #report{display:none}
 .dv2 .dgrid{display:grid;grid-template-columns:120px 1fr;gap:12px 16px;padding:14px 0 4px;font-size:14px}
 .dv2 .dk{color:var(--muted);font-size:13px;padding-top:2px}
 .dv2 .dvv{line-height:1.5}
-.dv2 .dp{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px dashed var(--line2)}
+.dv2 .dp{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;border-bottom:1px dashed var(--line2)}
+.dv2 .dp.gift{display:block}
+.dv2 .dp.gift .c{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;white-space:normal}
 .dv2 .dp:last-child{border-bottom:0}
-.dv2 .dp .n{font-weight:500}
+.dv2 .dp .n{font-weight:500;flex:1 1 auto;min-width:0}
 .dv2 .dp .pr{color:var(--muted);white-space:nowrap}
 .dv2 .dp .pr b{color:var(--text);font-weight:600}
 .dv2 .dp .pr em{font-style:normal;color:var(--danger);font-weight:600;margin-left:2px}
@@ -1460,7 +1462,8 @@ function openDetail(id){
   const md = (s)=> `${Number(s.slice(5,7))}/${Number(s.slice(8,10))}`;
   const sales = saleLines(p).filter(x=>x.name), gifts = giftLines(p).filter(x=>x.name);
   const prodRows = sales.map(x=>{ const a=num(x.price), s=lineSalePrice(x), pct=lineDiscPct(x); const hasDeal = a && s<a; return `<div class="dp"><span class="n">${esc(shortProd(x.name))}</span><span class="pr">${a?fmt(a)+'원':''}${hasDeal?` <b>→ ${fmt(s)}원</b> <em>${pct}%</em>`:''}</span></div>`; }).join('');
-  const giftRows = gifts.map(g=>`<div class="dp gift"><span class="n">사은품 · ${esc(shortProd(g.name))}</span><span class="pr">${esc(g.cond||'')}</span></div>`).join('');
+  const short = (s,n)=>{ s=String(s||''); return s.length>n ? s.slice(0,n-1)+'…' : s; };
+  const giftRows = gifts.map(g=>`<div class="dp gift" title="${esc(g.cond||'')}"><span class="n">사은품 · ${esc(shortProd(g.name))}</span>${g.cond?`<span class="c">${esc(short(g.cond,70))}</span>`:''}</div>`).join('');
   const todo = p.checklist.filter(c=>!c.done).slice(0,4);
   const crit = p.criteriaIds.map(i=>byId(S.criteria,i)).filter(Boolean);
   const kv = (k,v)=> `<dt>${k}</dt><dd>${v||'<span class="note">-</span>'}</dd>`;
@@ -1470,9 +1473,9 @@ function openDetail(id){
       <div class="dgrid">
         <div class="dk">테마 · 키워드</div><div class="dvv">${p.theme?esc(p.theme):(crit.length?esc(crit.map(c=>c.name).join(' · ')):'<span class="note">미정</span>')}</div>
         <div class="dk">판매 상품</div><div class="dvv">${prodRows||'<span class="note">상품 미정</span>'}${giftRows}</div>
-        <div class="dk">혜택</div><div class="dvv">${p.benefit?esc(p.benefit):'<span class="note">미정</span>'}${p.coupon?`<div class="note">쿠폰 · ${esc(p.coupon)}</div>`:''}</div>
+        <div class="dk">혜택</div><div class="dvv">${p.benefit?esc(p.benefit):'<span class="note">미정</span>'}${p.coupon?`<div class="note" title="${esc(p.coupon)}">쿠폰 · ${esc(short(p.coupon,60))}</div>`:''}</div>
         ${(b.total>0||b.sales>0)?`<div class="dk">예산 · 목표</div><div class="dvv">${b.total>0?`투입 예산 ${won(b.total)}`:''}${b.sales>0?`${b.total>0?' · ':''}목표 매출 ${won(b.sales)}`:''}${b.roas!=null?` · ROAS ${b.roas.toFixed(1)}배`:''}</div>`:''}
-        ${todo.length?`<div class="dk">다음 할 일</div><div class="dvv"><div class="cl" id="dTodo">${todo.map(c=>{ const i=p.checklist.indexOf(c); return `<label><input type="checkbox" data-i="${i}"><span>${esc(c.name)}</span></label>`; }).join('')}${pr?`<div class="note">${pr.done}/${pr.total} 완료</div>`:''}</div></div>`:''}
+        ${todo.length?`<div class="dk">다음 할 일</div><div class="dvv"><div class="cl" id="dTodo">${todo.map(c=>{ const i=p.checklist.indexOf(c); return `<label title="${esc(c.name)}"><input type="checkbox" data-i="${i}"><span>${esc(short(c.name.split(' - ')[0],40))}</span></label>`; }).join('')}${pr?`<div class="note">${pr.done}/${pr.total} 완료</div>`:''}</div></div>`:''}
       </div>
       <div class="actions" style="padding:14px 0 6px;border-top:1px solid var(--line2);margin-top:12px">
         <button type="button" class="btn primary" id="dQuick">수정</button>
