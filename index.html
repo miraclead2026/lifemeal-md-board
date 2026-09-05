@@ -942,7 +942,7 @@ function openForm(promo, opts){
         <span class="spacer"></span>
         <button type="button" class="btn sm ghost" id="openProductsFromForm">상품 마스터 관리</button>
       </div>
-      <div class="subh" style="margin-top:14px">이벤트 · 사은품 상품 <span class="hint">사은품·포장·샘플을 연결합니다. 원가 x 목표 수량으로 사은품 원가를 추정합니다.</span></div>
+      <div class="subh" style="margin-top:14px">이벤트 · 사은품 상품 <span class="hint">사은품·포장·샘플을 연결합니다. 새로 구매하는 사은품이면 원가 x 목표 수량으로 구매비를 추정합니다 (기존 재고는 예산에 넣지 않음).</span></div>
       <div id="giftList"></div>
       <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap"><button type="button" class="btn sm" id="lineAddEvent">+ 이벤트 상품 연결</button><span class="note" id="giftCostHint"></span><button type="button" class="btn xs ghost" id="giftCostApply" hidden>사은품 원가에 반영</button></div>
       <div class="fg" style="margin-top:12px">
@@ -951,18 +951,18 @@ function openForm(promo, opts){
         <div class="f s4"><label>핵심 고객 혜택 (카드 표시)</label><input type="text" data-k="benefit" value="${esc(d.benefit)}" placeholder="예: 2세트 구매 시 20% + 사은품"></div>
       </div>
     </div>
-    <div class="sec"><h3>목표 및 예산 <span class="hint">단위: 원</span></h3>
+    <div class="sec"><h3>목표 및 예산 <span class="hint">단위: 원 · 이 기획전을 위해 추가로 투입하는 비용만 넣습니다. 상품 할인에 따른 매출 감소분, 기존 재고를 사은품으로 쓰는 원가, 판매 수수료는 예산에 넣지 않습니다.</span></h3>
       <div class="fg">
         <div class="f s3"><label>목표 매출</label><input type="number" min="0" data-k="goal.sales" value="${esc(d.goal.sales)}"></div>
         <div class="f s3"><label>목표 판매수량 <span class="hint" id="qtyHint"></span></label><input type="number" min="0" data-k="goal.qty" value="${esc(d.goal.qty)}"></div>
         <div class="f s3"><label>총예산 (자동 합산)</label><div class="calc big" id="cTotal"></div></div>
         <div class="f s3"><label>예상 ROAS (목표 매출 ÷ 총예산)</label><div class="calc big" id="cRoas"></div></div>
         <div class="f s3"><label>광고비</label><input type="number" min="0" data-k="goal.ad" value="${esc(d.goal.ad)}"></div>
-        <div class="f s3"><label>할인 부담액</label><input type="number" min="0" data-k="goal.discount" value="${esc(d.goal.discount)}"></div>
-        <div class="f s3"><label>사은품 원가</label><input type="number" min="0" data-k="goal.giftCost" value="${esc(d.goal.giftCost)}"></div>
+        <div class="f s3"><label>쿠폰 · 할인 분담금 <span class="hint">(실제 지급분만)</span></label><input type="number" min="0" data-k="goal.discount" value="${esc(d.goal.discount)}"></div>
+        <div class="f s3"><label>사은품 구매비 <span class="hint">(새로 사는 것만)</span></label><input type="number" min="0" data-k="goal.giftCost" value="${esc(d.goal.giftCost)}"></div>
         <div class="f s3"><label>디자인 · 콘텐츠 제작비</label><input type="number" min="0" data-k="goal.prod" value="${esc(d.goal.prod)}"></div>
-        <div class="f s3"><label>채널 수수료</label><input type="number" min="0" data-k="goal.fee" value="${esc(d.goal.fee)}"></div>
-        <div class="f s3"><label>물류비</label><input type="number" min="0" data-k="goal.logistics" value="${esc(d.goal.logistics)}"></div>
+        <div class="f s3"><label>기획전 구좌 · 노출 비용</label><input type="number" min="0" data-k="goal.fee" value="${esc(d.goal.fee)}"></div>
+        <div class="f s3"><label>추가 물류비</label><input type="number" min="0" data-k="goal.logistics" value="${esc(d.goal.logistics)}"></div>
         <div class="f s3"><label>기타 비용</label><input type="number" min="0" data-k="goal.etc" value="${esc(d.goal.etc)}"></div>
         <div class="f s3"><label>예상 잔여금액 (목표 매출 - 총예산)</label><div class="calc" id="cRemain"></div></div>
       </div>
@@ -1240,7 +1240,7 @@ function openDetail(id){
       <dl class="kv" style="margin-top:8px">${kv('사은품', esc(p.gift))}${kv('쿠폰 · 포인트', esc(p.coupon))}${kv('핵심 고객 혜택', esc(p.benefit))}</dl>
       <h4>목표 및 예산</h4>
       <table class="bud num"><tr><td>목표 매출</td><td>${won(b.sales)}</td></tr><tr><td>목표 판매수량</td><td>${p.goal.qty!==''?fmt(p.goal.qty)+'개':'-'}</td></tr>
-        <tr><td>광고비</td><td>${won(p.goal.ad)}</td></tr><tr><td>할인 부담액</td><td>${won(p.goal.discount)}</td></tr><tr><td>사은품 원가</td><td>${won(p.goal.giftCost)}</td></tr><tr><td>디자인 · 콘텐츠 제작비</td><td>${won(p.goal.prod)}</td></tr><tr><td>채널 수수료</td><td>${won(p.goal.fee)}</td></tr><tr><td>물류비</td><td>${won(p.goal.logistics)}</td></tr><tr><td>기타 비용</td><td>${won(p.goal.etc)}</td></tr>
+        <tr><td>광고비</td><td>${won(p.goal.ad)}</td></tr><tr><td>쿠폰 · 할인 분담금</td><td>${won(p.goal.discount)}</td></tr><tr><td>사은품 구매비</td><td>${won(p.goal.giftCost)}</td></tr><tr><td>디자인 · 콘텐츠 제작비</td><td>${won(p.goal.prod)}</td></tr><tr><td>기획전 구좌 · 노출 비용</td><td>${won(p.goal.fee)}</td></tr><tr><td>추가 물류비</td><td>${won(p.goal.logistics)}</td></tr><tr><td>기타 비용</td><td>${won(p.goal.etc)}</td></tr>
         <tr class="tot"><td>총예산</td><td>${won(b.total)}</td></tr><tr><td>예상 잔여금액</td><td style="${b.remain<0?'color:var(--danger)':''}">${won(b.remain)}</td></tr><tr><td>예상 ROAS</td><td>${b.roas!=null?b.roas.toFixed(2)+'배':'-'}</td></tr></table>
       <h4>실행 준비 항목 ${pr?`<span class="note">${pr.done}/${pr.total} 완료</span>`:''}</h4>
       <div class="cl" id="dCl">${p.checklist.map((c,i)=>`<label class="${c.done?'done':''}"><input type="checkbox" data-i="${i}" ${c.done?'checked':''}><span>${esc(c.name)}</span></label>`).join('')||'<span class="note">항목 없음</span>'}</div>
@@ -1453,7 +1453,7 @@ function buildPromptText(ctx){
   L.push('- 상품 가격: 정상 단가는 참고 데이터의 price를 그대로 쓰고, 할인은 discount {type: pct(할인율) | amt(할인액) | price(행사가 직접), value}로 표현합니다. 행사가는 10원 단위로 반올림합니다.');
   L.push('- 세트 상품은 참고 데이터의 세트(type set)를 쓰거나, components에 구성품 productId와 qty를 넣어 새로 구성합니다. 새 세트의 price를 비우면 구성품 정상가 합계가 정상 단가가 됩니다.');
   L.push('- 이벤트 상품(type event)은 사은품·포장·샘플입니다. qtyPerOrder(주문당 수량), cost(단위 원가), condition(지급 조건)을 적습니다.');
-  L.push('- 예산: 총예산 = 광고비 + 할인 부담액 + 사은품 원가 + 디자인·콘텐츠 제작비 + 채널 수수료 + 물류비 + 기타. 예상 ROAS = 목표 매출 ÷ 총예산. 할인 부담액은 (정상가 - 행사가) x 목표 판매수량으로 추정하고, 채널 수수료는 채널별 수수료율을 가정하되 가정을 memo에 적습니다.');
+  L.push('- 예산: 이 기획전을 위해 추가로 투입하는 비용만 넣습니다. goal.ad(광고비), goal.discount(쿠폰·할인 분담금 중 실제 지급분), goal.giftCost(새로 구매하는 사은품 구매비), goal.prod(외주 디자인·콘텐츠 제작비), goal.fee(오픈마켓 기획전 구좌·노출 비용), goal.logistics(추가 물류비), goal.etc(기타). 상품 할인에 따른 매출 감소분, 기존 재고를 사은품으로 쓰는 원가, 판매 수수료는 예산에 넣지 않습니다(0). 총예산 = 위 항목 합계, 예상 ROAS = 목표 매출 ÷ 총예산. 금액을 모르면 0으로 두고 memo에 "확정 필요"라고 적습니다.');
   L.push('- 고객 노출 문구(혜택, 상품 설명)는 짧고 객관적으로 씁니다. 질병 예방·치료 효능 표현, 최상급 표현(1위·최고), 라벨 근거가 없는 수치는 쓰지 않습니다. 브랜드 가치와 원료 출처가 자연스럽게 드러나되 의학적 효능 주장으로 읽히지 않게 합니다.');
   L.push('- 상태는 아래 진행 상태 목록 중 하나를 쓰고, 새 기획이면 보통 "아이디어" 또는 "검토 중"으로 둡니다.');
   L.push('');
