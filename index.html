@@ -137,6 +137,7 @@ h1,h2,h3,h4{margin:0;font-weight:500;text-wrap:balance}
 .wcell .cnt{font-size:10.5px;color:var(--muted);display:inline-flex;align-items:center;gap:4px}
 .wcell .cnt b{font-weight:500}
 .wcell.over .cnt{color:var(--danger)}
+.wcell.full .cnt{color:var(--warn)}
 .wcell.mstart{border-left:2px solid var(--line)}
 .row .slot.mstart{border-left:2px solid var(--line)}
 .wcell.today{box-shadow:inset 0 -2px 0 var(--accent)}
@@ -157,6 +158,7 @@ h1,h2,h3,h4{margin:0;font-weight:500;text-wrap:balance}
 .slot.dragover{background:var(--accent-soft);outline:1px dashed var(--accent);outline-offset:-2px}
 .slot.over{background:repeating-linear-gradient(135deg,transparent 0 10px,var(--danger-bg) 10px 12px)}
 .slot.over:hover{background:repeating-linear-gradient(135deg,var(--surface2) 0 10px,var(--danger-bg) 10px 12px)}
+.slot.full{background:repeating-linear-gradient(135deg,transparent 0 10px,var(--warn-bg) 10px 12px)}
 
 /* ---------- card ---------- */
 .card{position:relative;z-index:2;margin:6px 6px 0 6px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--cc,var(--accent));border-radius:5px;padding:7px 9px 7px 9px;box-shadow:var(--shadow);cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0;align-self:start;transition:border-color .12s}
@@ -396,7 +398,8 @@ const STATUS_STYLE = {
   '제작 중':['#EDE9FE','#5B21B6'], '세팅 중':['#CCFBF1','#115E59'], '진행 예정':['#E0E7FF','#3730A3'],
   '진행 중':['#DCFCE7','#166534'], '완료':['#E2E8F0','#334155'], '보류':['#FFEDD5','#9A3412'], '취소':['#FEE2E2','#991B1B']
 };
-const CONCURRENT_LIMIT = 3; // 이 수 이상이면 경고
+const CONCURRENT_MAX = 2;   // 동시 진행 최대치 (대표 지침: 동시 2건까지)
+const CONCURRENT_LIMIT = CONCURRENT_MAX + 1; // 이 수 이상이면 경고(최대치 초과)
 const PALETTE = ['#2F6FB3','#D97706','#059669','#7C3AED','#DC2626','#0891B2','#C026D3','#65A30D','#EA580C','#4F46E5','#0D9488','#BE185D','#6B7280','#B45309','#1D4ED8','#9333EA'];
 
 const DEFAULT_CHANNELS = [
@@ -715,7 +718,7 @@ function renderAll(){ renderSummary(); renderFilterOptions(); if(S.view==='cal')
 function renderSummary(){
   const live = S.promotions.filter(p=>!p.archived);
   const counts = countsPerWeek();
-  const overWeeks = counts.filter(c=>c>=CONCURRENT_LIMIT).length;
+  const overWeeks = counts.filter(c=>c>=CONCURRENT_LIMIT).length; const fullWeeks = counts.filter(c=>c===CONCURRENT_MAX).length;
   const perMonth = MONTHS.map(m=>({m,budget:0,sales:0,n:0}));
   live.forEach(p=>{ const d=parseISO(p.start); if(!d) return; const i=MONTHS.indexOf(d.getMonth()+1); if(i<0) return; const b=budgetOf(p); perMonth[i].budget+=b.total; perMonth[i].sales+=b.sales; perMonth[i].n++; });
   const tot = perMonth.reduce((s,x)=>({budget:s.budget+x.budget,sales:s.sales+x.sales,n:s.n+x.n}),{budget:0,sales:0,n:0});
@@ -723,7 +726,7 @@ function renderSummary(){
     <div class="tile"><div class="lab">전체 기획전</div><div class="val num">${live.length}<small>건</small></div><div class="note">보관 ${S.promotions.length-live.length}건 제외</div></div>
     <div class="tile ok"><div class="lab">진행 중</div><div class="val num">${live.filter(p=>p.status==='진행 중').length}<small>건</small></div><div class="note">진행 예정 ${live.filter(p=>p.status==='진행 예정').length}건</div></div>
     <div class="tile"><div class="lab">검토 중</div><div class="val num">${live.filter(p=>p.status==='검토 중').length}<small>건</small></div><div class="note">아이디어 ${live.filter(p=>p.status==='아이디어').length}건 · 기획 중 ${live.filter(p=>p.status==='기획 중').length}건</div></div>
-    <div class="tile ${overWeeks?'warn':''}"><div class="lab">동시 진행 ${CONCURRENT_LIMIT}개 이상 주차</div><div class="val num">${overWeeks}<small>주차</small></div><div class="note">전 채널 합산 · 취소 제외</div></div>
+    <div class="tile ${overWeeks?'warn':''}"><div class="lab">동시 ${CONCURRENT_MAX}건 최대치 초과 주차</div><div class="val num">${overWeeks}<small>주차</small></div><div class="note">최대치 도달 ${fullWeeks}주차 · 전 채널 합산 · 취소 제외</div></div>
     <div class="mtable"><table class="num"><thead><tr><th>월별 (시작일 기준)</th>${perMonth.map(x=>`<th>${x.m}월</th>`).join('')}<th>합계</th></tr></thead>
       <tbody>
       <tr><td>기획전 수</td>${perMonth.map(x=>`<td>${x.n}건</td>`).join('')}<td>${tot.n}건</td></tr>
@@ -771,8 +774,8 @@ function renderCalendar(){
   h += `</div>`;
   // 주차 헤더
   h += `<div class="row hd weeks"><div class="cell sticky c1 corner">${chans.length}개 채널</div><div class="cell sticky c2 corner">${S.promotions.filter(isVisible).length}건 표시 중</div>`;
-  WEEKS.forEach(w=>{ const over = counts[w.idx]>=CONCURRENT_LIMIT; const isToday = today>=w.start && today<=w.end;
-    h += `<div class="cell wcell ${w.week===1?'mstart':''} ${over?'over':''} ${isToday?'today':''}" title="${over?'동시 진행 기획전이 '+CONCURRENT_LIMIT+'개 이상입니다':''}"><span class="wn">${w.label}</span><span class="wd">${w.range}</span><span class="cnt">${over?'<b>동시 '+counts[w.idx]+'건</b>':(counts[w.idx]?counts[w.idx]+'건':'')}</span></div>`; });
+  WEEKS.forEach(w=>{ const over = counts[w.idx]>=CONCURRENT_LIMIT; const full = counts[w.idx]===CONCURRENT_MAX; const isToday = today>=w.start && today<=w.end;
+    h += `<div class="cell wcell ${w.week===1?'mstart':''} ${over?'over':(full?'full':'')} ${isToday?'today':''}" title="${over?'동시 진행 기획전이 최대치('+CONCURRENT_MAX+'건)를 넘었습니다':(full?'동시 진행 최대치('+CONCURRENT_MAX+'건)에 도달했습니다':'')}"><span class="wn">${w.label}</span><span class="wd">${w.range}</span><span class="cnt">${over?'<b>동시 '+counts[w.idx]+'건 초과</b>':(full?'<b>동시 '+counts[w.idx]+'건</b>':(counts[w.idx]?counts[w.idx]+'건':''))}</span></div>`; });
   h += `</div>`;
 
   if(!chans.length) h += `<div class="empty">표시할 채널이 없습니다. 설정에서 채널을 추가하거나 활성화해 주세요.</div>`;
@@ -781,7 +784,7 @@ function renderCalendar(){
     h += `<div class="row chrow ${ch.active===false?'inactive':''}" data-ch="${ch.id}" style="grid-template-rows:repeat(${lanes},minmax(0,auto))">`;
     h += `<div class="cell sticky c1 chn" data-edit="name" data-ch="${ch.id}" title="클릭하여 채널명 수정"><span class="name">${esc(ch.name)}${ch.active===false?' <span class="meta">(비활성)</span>':''}</span><span class="meta">${(promosByCh[ch.id]||[]).length}건</span></div>`;
     h += `<div class="cell sticky c2 chd" data-edit="desc" data-ch="${ch.id}" title="클릭하여 채널 성격 수정">${esc(ch.desc||'')||'<span class="meta">채널 성격을 입력하세요</span>'}</div>`;
-    WEEKS.forEach(w=>{ h += `<div class="slot ${w.week===1?'mstart':''} ${counts[w.idx]>=CONCURRENT_LIMIT?'over':''}" data-ch="${ch.id}" data-w="${w.idx}" style="grid-column:${3+w.idx};grid-row:1 / span ${lanes}"><button type="button" class="addbtn" data-add="1">+ 등록</button></div>`; });
+    WEEKS.forEach(w=>{ h += `<div class="slot ${w.week===1?'mstart':''} ${counts[w.idx]>=CONCURRENT_LIMIT?'over':(counts[w.idx]===CONCURRENT_MAX?'full':'')}" data-ch="${ch.id}" data-w="${w.idx}" style="grid-column:${3+w.idx};grid-row:1 / span ${lanes}"><button type="button" class="addbtn" data-add="1">+ 등록</button></div>`; });
     items.forEach(p=> h += cardHTML(p, counts));
     h += `</div>`;
   });
@@ -796,7 +799,7 @@ function cardHTML(p, counts){
   const days = daysBetween(p.start,p.end)+1;
   const ddl = p.deadline && p.status!=='완료' && p.status!=='취소' && p.deadline < todayISO();
   return `<div class="card ${p.archived?'archived':''}" draggable="true" data-id="${p.id}" style="--cc:${cardColor(p)};grid-column:${3+p._sp.a} / span ${p._sp.b-p._sp.a+1};grid-row:${p._lane+1}" title="${esc(p.name)}">
-    <div class="top"><div class="tags">${critTags(p,2)||'<span class="tag more">기준 없음</span>'}</div>${over?'<span class="wb" title="동시 진행 기획전이 '+CONCURRENT_LIMIT+'개 이상입니다">!</span>':''}${statusPill(p.status)}</div>
+    <div class="top"><div class="tags">${critTags(p,2)||'<span class="tag more">기준 없음</span>'}</div>${over?'<span class="wb" title="동시 진행 기획전이 최대치('+CONCURRENT_MAX+'건)를 넘었습니다">!</span>':''}${statusPill(p.status)}</div>
     <div class="nm">${esc(p.name)||'(이름 없음)'}</div>
     <div class="ln"><span>${shortDate(p.start)} ~ ${shortDate(p.end)} (${days}일)</span>${p.owner?`<b>·</b><span>${esc(p.owner)}</span>`:''}</div>
     <div class="ln"><b>목적</b><span>${esc(pur)||'-'}</span></div>
@@ -1159,7 +1162,7 @@ function openForm(promo, opts){
     S.promotions.forEach(p=>{ if(p.id===d.id||p.archived||p.status==='취소') return; const sp=spanOf(p); if(!sp) return; for(let i=sp.a;i<=sp.b;i++) counts[i]++; });
     const sp = spanOf(d); let maxc=0; if(sp) for(let i=sp.a;i<=sp.b;i++) maxc=Math.max(maxc,counts[i]+1);
     const cc = $('#cConc',body);
-    if(maxc>=CONCURRENT_LIMIT){ cc.innerHTML = `<span style="color:var(--danger);font-weight:500">동시 진행 기획전이 ${CONCURRENT_LIMIT}개 이상입니다</span> <span class="note">(해당 기간 최대 ${maxc}건, 전 채널 합산 · 등록은 가능)</span>`; }
+    if(maxc>=CONCURRENT_LIMIT){ cc.innerHTML = `<span style="color:var(--danger);font-weight:500">동시 진행 기획전이 최대치(${CONCURRENT_MAX}건)를 넘습니다</span> <span class="note">(해당 기간 최대 ${maxc}건, 전 채널 합산 · 등록은 가능하지만 일정 조정을 권장)</span>`; } else if(maxc>=CONCURRENT_MAX){ cc.innerHTML = `<span style="color:var(--warn);font-weight:500">이 기간은 동시 진행 최대치(${CONCURRENT_MAX}건)에 도달합니다</span> <span class="note">(해당 기간 ${maxc}건, 전 채널 합산)</span>`; }
     else cc.innerHTML = sp ? `<span class="note">해당 기간 동시 진행 최대 ${maxc}건</span>` : '<span class="note">-</span>';
     const qsum = saleLines(d).reduce((s,p)=>s+num(p.qty),0); const gh=$('#giftCostHint',body); if(gh && giftLines(d).length){ const est=giftCostEstimate(); gh.textContent=`추정 사은품 원가 ${won(est)}`; $('#giftCostApply',body).hidden=!est; } $('#qtyHint',body).textContent = qsum ? `(상품별 합계 ${fmt(qsum)})` : '';
     $('#fmSub',ov).textContent = `${(byId(S.channels,d.channelId)||{}).name||''} · ${d.start||''} ~ ${d.end||''}`;
@@ -1446,7 +1449,7 @@ function buildPromptText(ctx){
   L.push('## 기획 규칙');
   L.push('- 채널·기준·목적·상품은 반드시 참고 데이터의 id를 사용합니다. 꼭 필요한데 목록에 없는 기준·목적은 새 이름 문자열로 넣을 수 있습니다 (대시보드가 자동 등록).');
   L.push(`- 기간은 ${YEAR}년 9월 1일 ~ 12월 31일 안에서 잡습니다. 대시보드는 각 월을 1~7일 / 8~14일 / 15~21일 / 22~28일 / 29일~말일의 5주차로 나눕니다.`);
-  L.push(`- 같은 기간에 진행 중인 기획전이 전 채널 합산 ${CONCURRENT_LIMIT}건 이상이면 리스크로 표시합니다. 아래 "현재 등록된 기획전"을 보고 겹침을 피하거나 근거를 적습니다.`);
+  L.push(`- 동시 진행 기획전은 전 채널 합산 최대 ${CONCURRENT_MAX}건까지입니다(디자인·운영 부하 기준). ${CONCURRENT_LIMIT}건 이상 겹치면 리스크로 표시하므로, 아래 "현재 등록된 기획전"을 보고 겹침을 피하거나 근거를 적습니다.`);
   L.push('- 상품 가격: 정상 단가는 참고 데이터의 price를 그대로 쓰고, 할인은 discount {type: pct(할인율) | amt(할인액) | price(행사가 직접), value}로 표현합니다. 행사가는 10원 단위로 반올림합니다.');
   L.push('- 세트 상품은 참고 데이터의 세트(type set)를 쓰거나, components에 구성품 productId와 qty를 넣어 새로 구성합니다. 새 세트의 price를 비우면 구성품 정상가 합계가 정상 단가가 됩니다.');
   L.push('- 이벤트 상품(type event)은 사은품·포장·샘플입니다. qtyPerOrder(주문당 수량), cost(단위 원가), condition(지급 조건)을 적습니다.');
