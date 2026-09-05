@@ -183,6 +183,46 @@ h1,h2,h3,h4{margin:0;font-weight:500;text-wrap:balance}
 /* ---------- list view ---------- */
 .listwrap{margin:0 20px 24px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:auto}
 
+/* ---------- report (main page) ---------- */
+body.report .summary,body.report .toolbar,body.report .viewtabs,body.report #calwrap,body.report #ganttwrap,body.report #listwrap{display:none!important}
+body.report .topbar .btn:not(#btnMode){display:none}
+body:not(.report) #report{display:none}
+.report{margin:16px 20px 24px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px 14px;overflow:auto}
+.rp-head{display:flex;align-items:flex-end;gap:14px;margin-bottom:12px;flex-wrap:wrap}
+.rp-head h2{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.rp-head .sub{font-size:12px;color:var(--muted)}
+.rp-head .acts{margin-left:auto;display:flex;gap:6px}
+.rtable{border-collapse:separate;border-spacing:0;font-size:12px;table-layout:fixed}
+.rtable th,.rtable td{border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);padding:0;height:30px;white-space:nowrap;overflow:hidden}
+.rtable thead th{background:var(--surface2);font-weight:500;color:var(--muted);font-size:11px;text-align:center;position:sticky;z-index:3}
+.rtable thead tr:first-child th{top:0;height:26px}
+.rtable thead tr:last-child th{top:26px;height:34px;border-bottom:1px solid var(--line)}
+.rtable thead th.mth{font-size:12px;color:var(--text);text-align:left;padding:0 8px;border-left:2px solid var(--line)}
+.rtable th.wk{width:var(--rw,54px);min-width:var(--rw,54px);line-height:1.15}
+.rtable th.wk .d{display:block;font-size:9.5px;color:var(--faint);font-weight:400}
+.rtable th.wk.mstart,.rtable td.rc.mstart{border-left:2px solid var(--line)}
+.rtable .l1,.rtable .l2{position:sticky;background:var(--surface);z-index:2;text-align:left;padding:0 8px}
+.rtable thead .l1,.rtable thead .l2{background:var(--surface2);z-index:4}
+.rtable .l1{left:0;width:112px;min-width:112px;max-width:112px;font-weight:500;border-right:1px solid var(--line2)}
+.rtable .l2{left:112px;width:270px;min-width:270px;max-width:270px;border-right:1px solid var(--line);line-height:1.2}
+.rtable .l2 .nm{display:block;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.rtable .l2 .pd{display:block;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;color:var(--muted)}
+.rtable tr.rch td{background:var(--surface2);height:24px;font-size:11.5px;color:var(--accent);font-weight:600}
+.rtable tr.rch td.l1,.rtable tr.rch td.l2{background:var(--surface2)}
+.rtable tr.rr{cursor:pointer}
+.rtable tr.rr:hover td.l1,.rtable tr.rr:hover td.l2{background:var(--accent-soft)}
+.rtable td.rc{position:relative;overflow:visible}
+.rtable td.rc.fix{background:#F59E0B}
+.rtable td.rc.rev{background:repeating-linear-gradient(135deg,#F59E0B 0 6px,#FDE7BE 6px 10px)}
+.rtable td.rc.done{background:#9CA3AF}
+.rtable td.rc .lb{position:absolute;left:4px;top:5px;height:20px;line-height:20px;padding:0 6px;border-radius:3px;background:rgba(255,255,255,.92);color:#1B2434;font-size:10.5px;font-weight:500;white-space:nowrap;z-index:1;box-shadow:0 0 0 1px rgba(0,0,0,.08);max-width:none}
+.rtable tr.rcnt td{height:24px;text-align:center;font-size:10.5px;color:var(--muted);background:var(--surface2)}
+.rtable tr.rcnt td.over{color:var(--danger);font-weight:700}
+.rp-foot{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:12px;font-size:11.5px;color:var(--muted)}
+.rp-foot i{display:inline-block;width:26px;height:13px;border-radius:2px;vertical-align:-2px;margin-right:5px}
+.rp-note{margin-top:10px;padding:8px 10px;background:var(--warn-bg);color:var(--warn);border-radius:4px;font-size:11.5px;line-height:1.5;display:inline-block}
+@media print{ body.report .topbar{display:none!important} body.report .report{margin:0;border:0;padding:0;overflow:visible} .rtable th,.rtable td{height:24px} }
+
 /* ---------- gantt view ---------- */
 .ganttwrap{margin:0 20px 24px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:auto;max-height:calc(100vh - 118px)}
 .gt-bar{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);position:sticky;left:0}
@@ -389,6 +429,7 @@ textarea.export{width:100%;min-height:220px;font-family:ui-monospace,Menlo,Conso
     </div>
     <div class="spacer"></div>
     <div class="storage" id="storageBadge"><i></i><span>저장소 연결 중</span></div>
+    <button type="button" class="btn" id="btnMode" title="등록·수정·예산·필터가 있는 작업 화면으로 전환">작업 화면 열기</button>
     <button type="button" class="btn" id="btnProducts">상품 관리</button>
     <button type="button" class="btn" id="btnCriteria">기획전 기준 관리</button>
     <button type="button" class="btn" id="btnSettings">채널 · 목적 · 설정</button>
@@ -397,6 +438,7 @@ textarea.export{width:100%;min-height:220px;font-family:ui-monospace,Menlo,Conso
     <button type="button" class="btn primary" id="btnNew">+ 기획전 등록</button>
   </header>
 
+  <section class="report" id="report"></section>
   <section class="summary" id="summary"></section>
 
   <section class="toolbar" id="toolbar">
@@ -679,7 +721,7 @@ class FirebaseStore {
 }
 
 /* ---------------- 앱 상태 ---------------- */
-const S = { store:null, channels:[], criteria:[], purposes:[], checklist:[], products:[], promotions:[], view:'gantt',
+const S = { store:null, channels:[], criteria:[], purposes:[], checklist:[], products:[], promotions:[], view:'gantt', mode:'report',
   filters:{month:'',channel:'',criteria:'',purpose:'',status:'',owner:'',q:'',archived:false,inactiveCh:false} };
 const byId = (list,id)=> list.find(x=>x.id===id);
 const sorted = (list)=> list.slice().sort((a,b)=>(a.order??0)-(b.order??0));
@@ -753,7 +795,7 @@ function assignLanes(list){ // 겹치지 않게 행(레인) 배정
 }
 
 /* ---------------- 렌더: 전체 ---------------- */
-function renderAll(){ renderSummary(); renderFilterOptions(); if(S.view==='cal') renderCalendar(); else if(S.view==='gantt') renderGantt(); else renderList(); }
+function renderAll(){ if(S.mode==='report'){ renderReport(); return; } renderSummary(); renderFilterOptions(); if(S.view==='cal') renderCalendar(); else if(S.view==='gantt') renderGantt(); else renderList(); }
 
 function renderSummary(){
   const live = S.promotions.filter(p=>!p.archived);
@@ -848,6 +890,53 @@ function cardHTML(p, counts){
     <div class="bt"><span class="bud num">예산 ${manwon(b.total)}</span><span class="pr num">${pr?`체크 ${pr.done}/${pr.total}`:''}${ddl?' <span class="ddl">마감 지남</span>':''}</span></div>
   </div>`;
 }
+
+/* ---------------- 렌더: 보고용 메인 (한 장짜리 채널 x 주차 표) ---------------- */
+const REPORT_GROUP = { '기획 중':'fix','제작 중':'fix','세팅 중':'fix','진행 예정':'fix','진행 중':'fix','완료':'done','아이디어':'rev','검토 중':'rev','보류':'rev' };
+function reportProduct(p){ const ls=saleLines(p).map(l=>l.name).filter(Boolean); const g=giftLines(p).map(l=>l.name).filter(Boolean); let s=ls.slice(0,2).join(', '); if(ls.length>2) s+=` 외 ${ls.length-2}`; if(!s && g.length) s='사은품 '+g[0]; return s; }
+function shortName(n){ n=String(n||''); return n.length>22 ? n.slice(0,22)+'…' : n; }
+function renderReport(){
+  const counts = countsPerWeek();
+  const rows = S.promotions.filter(p=>!p.archived && p.status!=='취소').map(p=>Object.assign({},p,{_sp:spanOf(p)})).filter(p=>p._sp);
+  const chans = sorted(S.channels).filter(c=> rows.some(p=>p.channelId===c.id));
+  const nFix = rows.filter(p=>REPORT_GROUP[p.status]==='fix').length, nRev = rows.filter(p=>REPORT_GROUP[p.status]==='rev').length, nDone = rows.filter(p=>REPORT_GROUP[p.status]==='done').length;
+  let h = `<div class="rp-head"><div><h2>라이프밀 프로모션 계획 ${YEAR}년 9~12월</h2><div class="sub">채널별 기획전 일정 · 확정 ${nFix}건 · 검토 중 ${nRev}건${nDone?` · 완료 ${nDone}건`:''} · 기준일 ${todayISO()}</div></div><div class="acts"><button type="button" class="btn sm" id="rpImg">이미지로 저장</button><button type="button" class="btn sm" id="rpPrint">인쇄 · PDF</button></div></div>`;
+  h += `<div style="overflow:auto"><table class="rtable"><thead><tr><th class="l1" rowspan="2">채널</th><th class="l2" rowspan="2">기획전 · 대표 상품</th>`;
+  MONTHS.forEach(m=>{ h += `<th class="mth" colspan="5">${m}월</th>`; });
+  h += `</tr><tr>`;
+  WEEKS.forEach(w=>{ const d=w.range.split('~'); h += `<th class="wk ${w.week===1?'mstart':''}">${w.week}주<span class="d">${d[0].split('.')[1]}~${d[1].split('.')[1]}</span></th>`; });
+  h += `</tr></thead><tbody>`;
+  if(!rows.length) h += `<tr><td colspan="${2+WEEKS.length}" class="empty">등록된 기획전이 없습니다.</td></tr>`;
+  chans.forEach(ch=>{
+    const list = rows.filter(p=>p.channelId===ch.id).sort((a,b)=> a._sp.a-b._sp.a || (a.start||'').localeCompare(b.start||''));
+    h += `<tr class="rch"><td class="l1">${esc(ch.name)}</td><td class="l2">${list.length}건</td>${WEEKS.map(w=>`<td class="rc ${w.week===1?'mstart':''}"></td>`).join('')}</tr>`;
+    list.forEach(p=>{
+      const g = REPORT_GROUP[p.status]||'rev'; const pd = reportProduct(p);
+      h += `<tr class="rr" data-id="${p.id}" title="${esc(p.name)} · ${p.start}~${p.end} · ${esc(p.status)}${p.benefit?' · '+esc(p.benefit):''}"><td class="l1"><span class="note">${p.start.slice(5).replace('-','/')}~${p.end.slice(5).replace('-','/')}</span></td><td class="l2"><span class="nm">${esc(p.name)}</span>${pd?`<span class="pd">${esc(pd)}</span>`:''}</td>`;
+      WEEKS.forEach(w=>{ const on = w.idx>=p._sp.a && w.idx<=p._sp.b; h += `<td class="rc ${w.week===1?'mstart':''} ${on?g:''}">${w.idx===p._sp.a?`<span class="lb">${esc(shortName(p.name))}</span>`:''}</td>`; });
+      h += `</tr>`;
+    });
+  });
+  h += `<tr class="rcnt"><td class="l1">동시 진행</td><td class="l2" style="font-weight:400">주차별 전 채널 합산 · 최대 ${CONCURRENT_MAX}건</td>${WEEKS.map(w=>`<td class="${counts[w.idx]>=CONCURRENT_LIMIT?'over':''} ${w.week===1?'mstart':''}">${counts[w.idx]||''}</td>`).join('')}</tr>`;
+  h += `</tbody></table></div>`;
+  h += `<div class="rp-foot"><span><i style="background:#F59E0B"></i>확정 · 진행 중</span><span><i style="background:repeating-linear-gradient(135deg,#F59E0B 0 5px,#FDE7BE 5px 8px)"></i>검토 중 (시점 · 채널 조정 가능)</span><span><i style="background:#9CA3AF"></i>완료</span><span style="margin-left:auto">행을 누르면 상세 내용</span></div>`;
+  h += `<div class="rp-note">참고: 1. 검토 중 항목은 상품 구성과 혜택 수준 확정 후 색이 바뀝니다. 2. 같은 주에 전 채널 합산 ${CONCURRENT_MAX}건을 넘으면 아래 줄에 빨간 숫자로 표시됩니다.</div>`;
+  const R = $('#report'); R.innerHTML = h;
+  $$('tr.rr[data-id]',R).forEach(tr=>tr.addEventListener('click', ()=>openDetail(tr.dataset.id)));
+  $('#rpPrint',R).addEventListener('click', ()=>window.print());
+  $('#rpImg',R).addEventListener('click', saveReportImage);
+}
+async function saveReportImage(){
+  const R = $('#report');
+  try{
+    if(!window.html2canvas){ await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+    const acts = $('.rp-head .acts',R); acts.style.visibility='hidden';
+    const canvas = await html2canvas(R, {scale:2, backgroundColor:'#ffffff', windowWidth: R.scrollWidth+60, scrollX:0, scrollY:0});
+    acts.style.visibility='';
+    const a=document.createElement('a'); a.href=canvas.toDataURL('image/png'); a.download=`라이프밀_프로모션계획_${todayISO()}.png`; document.body.appendChild(a); a.click(); a.remove(); toast('이미지를 저장했습니다');
+  }catch(e){ console.warn(e); toast('이미지 저장이 막힌 환경입니다. 인쇄 · PDF를 이용해 주세요.'); }
+}
+function setMode(m){ S.mode=m; document.body.classList.toggle('report', m==='report'); $('#btnMode').textContent = m==='report' ? '작업 화면 열기' : '보고 화면으로'; try{ sessionStorage.setItem('mdboard-mode', m); }catch(_){ } renderAll(); }
 
 /* ---------------- 렌더: 간트 차트 (월·주차 x 채널별 기획전) ---------------- */
 const GANTT_STATUS = { // 상태 → 범례 그룹
@@ -1706,6 +1795,9 @@ function openImportPromo(opts){ // opts.onDraft: 폼에 채우기 모드
 
 /* ---------------- 상단 · 필터 이벤트 ---------------- */
 $('#btnNew').addEventListener('click', ()=>openForm(newPromotion({})));
+$('#btnMode').addEventListener('click', ()=>setMode(S.mode==='report'?'work':'report'));
+try{ const mm=sessionStorage.getItem('mdboard-mode'); if(mm==='work') S.mode='work'; }catch(_){ }
+document.body.classList.toggle('report', S.mode==='report'); $('#btnMode').textContent = S.mode==='report' ? '작업 화면 열기' : '보고 화면으로';
 $('#btnCriteria').addEventListener('click', ()=>openSettings('criteria'));
 $('#btnProducts').addEventListener('click', ()=>openProducts());
 $('#btnPrompt').addEventListener('click', ()=>openPromptBuilder());
