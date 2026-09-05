@@ -383,8 +383,8 @@ textarea.export{width:100%;min-height:220px;font-family:ui-monospace,Menlo,Conso
       <div class="sub">2026년 9월 ~ 12월 · 채널별 기획전 일정 · 예산 · 진행 상태</div>
     </div>
     <div class="viewtabs" role="tablist">
-      <button type="button" id="tabCal" class="on" data-view="cal">캘린더</button>
-      <button type="button" id="tabGantt" data-view="gantt">간트 차트</button>
+      <button type="button" id="tabCal" data-view="cal">캘린더</button>
+      <button type="button" id="tabGantt" class="on" data-view="gantt">간트 차트</button>
       <button type="button" id="tabList" data-view="list">목록 · 보고</button>
     </div>
     <div class="spacer"></div>
@@ -412,8 +412,8 @@ textarea.export{width:100%;min-height:220px;font-family:ui-monospace,Menlo,Conso
     <button type="button" class="btn sm ghost" id="fReset">필터 초기화</button>
   </section>
 
-  <section class="calwrap" id="calwrap"><div class="cal" id="cal"></div></section>
-  <section class="ganttwrap" id="ganttwrap" hidden></section>
+  <section class="calwrap" id="calwrap" hidden><div class="cal" id="cal"></div></section>
+  <section class="ganttwrap" id="ganttwrap"></section>
   <section class="listwrap" id="listwrap" hidden></section>
 </div>
 <div id="modalRoot"></div>
@@ -679,7 +679,7 @@ class FirebaseStore {
 }
 
 /* ---------------- 앱 상태 ---------------- */
-const S = { store:null, channels:[], criteria:[], purposes:[], checklist:[], products:[], promotions:[], view:'cal',
+const S = { store:null, channels:[], criteria:[], purposes:[], checklist:[], products:[], promotions:[], view:'gantt',
   filters:{month:'',channel:'',criteria:'',purpose:'',status:'',owner:'',q:'',archived:false,inactiveCh:false} };
 const byId = (list,id)=> list.find(x=>x.id===id);
 const sorted = (list)=> list.slice().sort((a,b)=>(a.order??0)-(b.order??0));
