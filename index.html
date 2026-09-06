@@ -243,6 +243,16 @@ body:not(.report) #report{display:none}
 .wtable td.cell .add{position:absolute;right:5px;bottom:5px;font-size:11.5px;color:var(--faint);border:1px dashed var(--line);border-radius:4px;padding:1px 6px;background:var(--surface);opacity:0;pointer-events:none}
 .wtable td.cell:hover .add{opacity:1}
 .wtable td.bar{padding:5px}
+.wtable td.prep{padding:5px;cursor:pointer}
+.wtable td.prep .pz{border:1px dashed #C7CEDA;border-radius:5px;background:repeating-linear-gradient(45deg,#F4F6F9,#F4F6F9 6px,#EDF0F5 6px,#EDF0F5 12px);color:#6B7280;font-size:11.5px;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wtable tr.szn td{background:#FFFBEB;border-bottom:2px solid #B9C2CF;padding:6px 8px;vertical-align:middle}
+.wtable tr.szn td.chc{background:#FEF3C7;color:#92400E;font-weight:700;font-size:13px;z-index:4}
+.wtable tr.szn td.chc .r{color:#A16207;font-weight:400}
+.wtable tr.szn .sz{display:block;font-size:11.5px;color:#92400E;line-height:1.35;font-weight:600}
+.wtable.fitall tr.szn .sz{font-size:10.5px;font-weight:500}
+.wtable.fitall td.prep .pz{font-size:10px;padding:3px 5px}
+.pb .kw{font-size:11.5px;color:#4B5563;margin-top:2px;white-space:normal;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.wtable.fitall .pb .kw{display:none}
 .wtable tr.cnt td{background:#F7F9FC;text-align:center;font-weight:700;color:var(--muted);font-size:13.5px;padding:8px 4px;position:sticky;bottom:0;z-index:3;border-top:2px solid #B9C2CF}
 .wtable tr.cnt td.chc{z-index:5}
 .wtable tr.cnt td.chc .r{display:block;font-size:11.5px;font-weight:400;margin-top:2px}
@@ -407,6 +417,16 @@ body:not(.report) #report{display:none}
 .lrow2 label.wide{flex:1.4;min-width:190px}
 .lcalc{display:flex;flex-direction:column;justify-content:center;padding:4px 8px;background:var(--accent-soft);border-radius:4px;min-height:32px}
 .calc-sale{font-size:13.5px;font-weight:500;color:var(--accent)}
+.calc-floor{font-size:11.5px;color:var(--faint);margin-left:6px}
+.calc-floor.bad{color:var(--danger);font-weight:600}
+.steprow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.steprow input[type=text]{flex:1;min-width:0;padding:6px 9px;border:1px solid var(--line);border-radius:4px;font-size:13px;background:var(--surface)}
+.steprow input[type=date]{width:170px;padding:6px 9px;border:1px solid var(--line);border-radius:4px;font-size:13px;background:var(--surface)}
+.steprow .dd{width:80px;font-size:12px}
+.steprow .rm{border:0;background:none;color:var(--faint);font-size:17px;padding:0 6px;cursor:pointer}
+.steprow .rm:hover{color:var(--danger)}
+.floorwarn{margin-top:6px;padding:6px 9px;border:1px solid #F0C9C9;background:#FDF2F2;color:#B42318;border-radius:5px;font-size:12px;line-height:1.45}
+.pricepolicy{margin-top:6px;padding:8px 10px;border:1px solid #DCE3EC;background:#F7F9FC;color:var(--muted);border-radius:5px;font-size:12px;line-height:1.5}
 .calc-disc{font-size:11px;color:var(--muted)}
 .lcomp{margin-top:8px;padding:8px 10px;background:var(--surface2);border-radius:4px}
 .crow{display:flex;gap:6px;align-items:center;margin-bottom:4px}
@@ -577,45 +597,51 @@ const DEFAULT_CHECKLIST = ['상품 구성 확정','가격 협의 완료','재고
    type: single(일반) / set(세트) / event(이벤트·사은품). 세트는 components로 구성품과 수량을 가집니다. */
 const DEFAULT_PRODUCTS = [
   // 생식 한 끼
-  ['pd_daily14','황성주 박사의 라이프밀 데일리 14포','single','생식','30g x 14포',45000,0,''],
-  ['pd_daily5','황성주 박사의 라이프밀 데일리 5포','single','생식','30g x 5포',14900,0,'팝업·오프라인 위주'],
-  ['pd_life14','황성주 박사의 1일 1생식 라이프밀 14포','single','생식','30g x 14포 (420g)',53000,0,''],
-  ['pd_nutri30','황성주 박사의 영양식 30포','single','생식','30g x 30포',45000,0,''],
-  ['pd_nutri5','황성주 박사의 영양식 5포','single','생식','30g x 5포',9900,0,'팝업·오프라인 위주'],
-  ['pd_ferm30','황성주 박사의 발효건강식 30포','single','생식','30g x 30포',49000,0,''],
-  ['pd_ferm5','황성주 박사의 발효건강식 5포','single','생식','30g x 5포',9900,0,'팝업·오프라인 위주'],
-  ['pd_drsalad14','황성주 박사의 닥터샐러드 14포','single','생식','3g x 14포',40000,0,''],
+  ['pd_daily14','황성주 박사의 라이프밀 데일리 14포','single','생식','30g x 14포',45000,0,'',29900],
+  ['pd_daily5','황성주 박사의 라이프밀 데일리 5포','single','생식','30g x 5포',14900,0,'팝업·오프라인 위주',14900],
+  ['pd_life14','황성주 박사의 1일 1생식 라이프밀 14포','single','생식','30g x 14포 (420g)',53000,0,'',32900],
+  ['pd_nutri30','황성주 박사의 영양식 30포','single','생식','30g x 30포',45000,0,'',36900],
+  ['pd_nutri5','황성주 박사의 영양식 5포','single','생식','30g x 5포',9900,0,'팝업·오프라인 위주',9900],
+  ['pd_ferm30','황성주 박사의 발효건강식 30포','single','생식','30g x 30포',49000,0,'',39900],
+  ['pd_ferm5','황성주 박사의 발효건강식 5포','single','생식','30g x 5포',9900,0,'팝업·오프라인 위주',9900],
+  ['pd_drsalad14','황성주 박사의 닥터샐러드 14포','single','생식','3g x 14포',40000,0,'',15900],
   // 단백질
-  ['pd_pgold21','황성주 박사의 프로틴골드 HIGH5 21포','single','단백질','30g x 21포',30000,0,''],
-  ['pd_pgold5','황성주 박사의 프로틴골드 HIGH5 5포','single','단백질','30g x 5포',9900,0,'팝업·오프라인 위주'],
-  ['pd_dayup_org','데이업 프로틴쉐이크 오리지널 7개입','single','단백질','45g x 7파우치',31500,0,'표시 정가 42,000원'],
-  ['pd_dayup_choco','데이업 프로틴쉐이크 초코 7개입','single','단백질','45g x 7파우치',31500,0,'표시 정가 42,000원 · 저당 표현 금지'],
-  ['pd_dayup_banana','데이업 프로틴쉐이크 바나나 7개입','single','단백질','45g x 7파우치',31500,0,'표시 정가 42,000원'],
-  ['pd_dayup_pumpkin','데이업 프로틴쉐이크 단호박고구마 7개입','single','단백질','45g x 7파우치',31500,0,'표시 정가 42,000원'],
+  ['pd_pgold21','황성주 박사의 프로틴골드 HIGH5 21포','single','단백질','30g x 21포',30000,0,'',24900],
+  ['pd_pgold5','황성주 박사의 프로틴골드 HIGH5 5포','single','단백질','30g x 5포',9900,0,'팝업·오프라인 위주',9900],
+  ['pd_dayup_org','데이업 프로틴쉐이크 오리지널 7개입','single','단백질','45g x 7파우치',31500,0,'표시 정가 42,000원',18900],
+  ['pd_dayup_choco','데이업 프로틴쉐이크 초코 7개입','single','단백질','45g x 7파우치',31500,0,'표시 정가 42,000원 · 저당 표현 금지',18900],
+  ['pd_dayup_banana','데이업 프로틴쉐이크 바나나 7개입','single','단백질','45g x 7파우치',31500,0,'표시 정가 42,000원',18900],
+  ['pd_dayup_pumpkin','데이업 프로틴쉐이크 단호박고구마 7개입','single','단백질','45g x 7파우치',31500,0,'표시 정가 42,000원',18900],
   // 건강 간식
-  ['pd_bar_choco','데이크런치 프로틴바 초코 10개입','single','간식','35g x 10개',28000,0,'땅콩 함유'],
-  ['pd_bar_grain','데이크런치 프로틴바 그레인 10개입','single','간식','30g x 10개',28000,0,'땅콩 함유'],
-  ['pd_nuts30','갓 구운 하루견과 30봉','single','간식','20g x 30봉',40000,0,''],
-  ['pd_granola7','홀그레인 저당 그래놀라 7봉','single','간식','20g x 7봉',24000,0,'땅콩 함유'],
+  ['pd_bar_choco','데이크런치 프로틴바 초코 10개입','single','간식','35g x 10개',28000,0,'땅콩 함유',16900],
+  ['pd_bar_grain','데이크런치 프로틴바 그레인 10개입','single','간식','30g x 10개',28000,0,'땅콩 함유',16900],
+  ['pd_nuts30','갓 구운 하루견과 30봉','single','간식','20g x 30봉',40000,0,'',28900],
+  ['pd_granola7','홀그레인 저당 그래놀라 7봉','single','간식','20g x 7봉',24000,0,'땅콩 함유',9900],
   // 젤리 이너뷰티
-  ['pd_jelly_aloe','알로에 비타 프룻 젤리 스틱 15포','single','젤리','20g x 15포',28000,0,''],
-  ['pd_jelly_prune','푸룬 식이섬유 프룻 젤리 스틱 15포','single','젤리','20g x 15포',28000,0,'저당·유산균 표현 금지'],
-  ['pd_jelly_abc','ABC 콜라겐 프룻 젤리 스틱 15포','single','젤리','20g x 15포',28000,0,'저당 표현 금지 · 콜라겐 5%만 표기'],
+  ['pd_jelly_aloe','알로에 비타 프룻 젤리 스틱 15포','single','젤리','20g x 15포',28000,0,'',12900],
+  ['pd_jelly_prune','푸룬 식이섬유 프룻 젤리 스틱 15포','single','젤리','20g x 15포',28000,0,'저당·유산균 표현 금지',12900],
+  ['pd_jelly_abc','ABC 콜라겐 프룻 젤리 스틱 15포','single','젤리','20g x 15포',28000,0,'저당 표현 금지 · 콜라겐 5%만 표기',12900],
   // 이벤트·사은품
-  ['pd_ev_coolbag','라이프밀 쿨백','event','사은품','370 x 230 x 170mm',19900,7000,'10만 원 이상 구매 증정 실적'],
-  ['pd_ev_bottle','쉐이크 보틀','event','사은품','1개',0,0,'원가 확인 필요'],
+  ['pd_ev_coolbag','라이프밀 쿨백','event','사은품','370 x 230 x 170mm',19900,7000,'10만 원 이상 구매 증정 실적',19900],
+  ['pd_ev_bottle','쉐이크 보틀','event','사은품','1개',0,0,'원가 확인 필요',2900],
   ['pd_ev_giftbox','선물 포장 박스 (C-Type 리본 핸들 그린)','event','포장','260.8 x 203.3 x 125mm',0,0,'원가 확인 필요'],
   ['pd_ev_sample3','스틱 샘플 3포 (닥터샐러드)','event','샘플','3g x 3포',0,0,'트라이얼 키트 구성품'],
-  ['pd_ev_bag','쇼핑백','event','포장','1개',0,0,'원가 확인 필요']
-].map((p,i)=>({id:p[0],name:p[1],type:p[2],category:p[3],spec:p[4],price:p[5],cost:p[6],note:p[7],stock:'',components:[],priceMode:'manual',active:true,order:i}));
+  ['pd_ev_bag','쇼핑백','event','포장','1개',0,0,'원가 확인 필요'],
+  // 동결건조칩 (FREEZE LAB)
+  ['pd_chip_apple','FREEZE LAB 동결건조 사과칩','single','동결건조칩','15g',5500,0,'',4900],
+  ['pd_chip_straw','FREEZE LAB 동결건조 딸기칩','single','동결건조칩','15g',5500,0,'',4900],
+  ['pd_chip_citrus','FREEZE LAB 동결건조 감귤칩','single','동결건조칩','15g',5500,0,'',4900],
+  ['pd_chip_tomato','FREEZE LAB 동결건조 방울토마토칩','single','동결건조칩','15g',5500,0,'',4900]
+].map((p,i)=>({id:p[0],name:p[1],type:p[2],category:p[3],spec:p[4],price:p[5],cost:p[6],note:p[7],floor:p[8]||0,stock:'',components:[],priceMode:'manual',active:true,order:i}));
 // 세트 상품 (구성품 x 수량). priceMode auto면 구성품 합계, manual이면 price 사용
 [
   ['pd_set_chuseok','[추석] 데일리 생식 세트','선물세트',[['pd_daily14',1],['pd_drsalad14',2]],59000,'표시 정가 125,000원 · 판매중'],
   ['pd_set_dailyroutine','[가정의달] 데일리 루틴 웰니스','선물세트',[['pd_daily14',2],['pd_drsalad14',2]],158000,'판매중지 · 사은품 포함'],
   ['pd_set_family','[가정의달] 온가족 루틴 웰니스','선물세트',[['pd_nutri30',1],['pd_ferm30',1],['pd_pgold21',1]],124000,'판매중지 · 사은품 포함'],
   ['pd_set_b','[가정의달] 선물세트 B','선물세트',[['pd_nuts30',1],['pd_granola7',2]],142200,'표시 정가 158,000원'],
-  ['pd_set_c','[가정의달] 선물세트 C','선물세트',[['pd_nuts30',1],['pd_granola7',1],['pd_bar_grain',1],['pd_bar_choco',1]],99810,'표시 정가 110,900원']
-].forEach((s,i)=> DEFAULT_PRODUCTS.push({id:s[0],name:s[1],type:'set',category:s[2],spec:s[3].map(c=>c[1]+'개').join(' + '),price:s[4],cost:0,note:s[5],stock:'',components:s[3].map(c=>({productId:c[0],qty:c[1]})),priceMode:'manual',active:true,order:DEFAULT_PRODUCTS.length+i}));
+  ['pd_set_c','[가정의달] 선물세트 C','선물세트',[['pd_nuts30',1],['pd_granola7',1],['pd_bar_grain',1],['pd_bar_choco',1]],99810,'표시 정가 110,900원'],
+  ['pd_set_chip8','FREEZE LAB 동결건조칩 8봉 세트','선물세트',[['pd_chip_apple',2],['pd_chip_straw',2],['pd_chip_citrus',2],['pd_chip_tomato',2]],32000,'표시 정가 44,000원']
+].forEach((s,i)=> DEFAULT_PRODUCTS.push({id:s[0],name:s[1],type:'set',category:s[2],spec:s[3].map(c=>c[1]+'개').join(' + '),price:s[4],cost:0,note:s[5],floor:s[6]||0,stock:'',components:s[3].map(c=>({productId:c[0],qty:c[1]})),priceMode:'manual',active:true,order:DEFAULT_PRODUCTS.length+i}));
 
 const COLLECTIONS = ['channels','criteria','purposes','checklist','products','promotions'];
 
@@ -632,6 +658,7 @@ const pad2 = (n)=> String(n).padStart(2,'0');
 const toISO = (d)=> d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
 const parseISO = (s)=> { if(!s) return null; const [y,m,d] = s.split('-').map(Number); if(!y||!m||!d) return null; return new Date(y,m-1,d); };
 const addDays = (s,n)=> { const d = parseISO(s); d.setDate(d.getDate()+n); return toISO(d); };
+const okDate = (s)=> /^\d{4}-\d{2}-\d{2}$/.test(String(s||''));
 const daysBetween = (a,b)=> { const A=parseISO(a),B=parseISO(b); if(!A||!B) return 0; return Math.round((B-A)/86400000); };
 const shortDate = (s)=> { const d = parseISO(s); return d ? (d.getMonth()+1)+'.'+d.getDate() : ''; };
 const todayISO = ()=> toISO(new Date());
@@ -801,11 +828,47 @@ function applySnapshot(snap){
   renderAll();
 }
 
+/* ---------------- 준비 단계 (기획전 앞 일정) ---------------- */
+const PREP_STEPS = [ ['기획 확정', 17], ['소재 제작', 10], ['채널 세팅', 3] ]; // 오픈 D-일수
+function autoSteps(start){
+  if(!okDate(start)) return [];
+  const s = PREP_STEPS.map(([name,d])=>({name, date: addDays(start, -d)}));
+  s.push({name:'오픈', date:start});
+  return s;
+}
+function stepSpan(p){ // 준비 시작 주차 ~ 오픈 직전 주차
+  const ds = (p.steps||[]).map(s=>s.date).filter(okDate).sort();
+  if(!ds.length) return null;
+  const a = weekIndexOf(ds[0]); const b = weekIndexOf(p.start);
+  if(a==null || b==null || a>=b) return null;
+  return {a, b:b-1};
+}
+/* ---------------- 시즌 이슈 (월·주차별 판매 이슈) ---------------- */
+const SEASON_ISSUES = {
+  '9-1':'개학 · 환절기 시작', '9-2':'추석 선물 구매 피크', '9-3':'추석 배송 마감 주',
+  '9-4':'추석 연휴 9/24~26', '9-5':'명절 후 회복 · 다이어트',
+  '10-1':'개천절 연휴 · 가을 나들이', '10-2':'한글날 연휴 10/9', '10-3':'환절기 면역 · 가을 다이어트',
+  '10-4':'할로윈 준비', '10-5':'할로윈 10/31',
+  '11-1':'빼빼로데이 준비', '11-2':'빼빼로데이 11/11', '11-3':'수능 11/19',
+  '11-4':'블랙프라이데이 11/27', '11-5':'사이버먼데이 · 연말 시작',
+  '12-1':'연말 선물 시즌 시작', '12-2':'크리스마스 구매 피크', '12-3':'크리스마스 배송 마감',
+  '12-4':'크리스마스 12/25', '12-5':'연말 · 새해 다이어트 예열'
+};
+const seasonOf = (w)=> SEASON_ISSUES[w.month+'-'+w.week] || '';
+
 /* ---------------- 상품 마스터 계산 ---------------- */
 const PRODUCT_TYPES = {single:'일반 상품', set:'세트 상품', event:'이벤트 · 사은품'};
 function productById(id){ return byId(S.products, id); }
 function componentsSum(components){ // 구성품 정상 단가 합계
   return (components||[]).reduce((s,c)=>{ const pr=productById(c.productId); return s + (pr?num(masterPrice(pr)):num(c.price))*num(c.qty||1); },0);
+}
+function floorPrice(p){ return p ? num(p.floor) : 0; }
+// 단품 최저 판매가 규정 위반 여부. 세트(묶음)는 구성으로 우회 가능하므로 제외
+function lineFloorWarn(it){
+  if(!it || it.kind!=='single' || !it.productId || it.productId==='__manual') return null;
+  const p = productById(it.productId); const fl = floorPrice(p); if(!fl) return null;
+  const s = lineSalePrice(it); if(!s || s>=fl) return null;
+  return `최저 판매가 ${fmt(fl)}원 미만입니다. 단품은 이 가격 아래로 내릴 수 없습니다 - 세트로 묶거나 사은품을 얹는 방식으로 바꿔 주세요.`;
 }
 function masterPrice(p){ // 상품 마스터의 정상 단가 (세트 auto면 구성품 합계)
   if(!p) return 0;
@@ -985,20 +1048,29 @@ function renderReport(){
   h += `</tr><tr class="hw">`;
   vis.forEach(w=>{ h += `<th class="wk ${w.week===1?'ms':''}">${w.month}월 ${w.week}주<span class="d">${fitAll?w.range:w.range.replace('~',' ~ ')}</span></th>`; });
   h += `</tr></thead><tbody>`;
+  h += `<tr class="szn"><td class="chc">시즌 이슈<span class="r">이 주에 걸린 시즌 · 기념일</span></td>`;
+  vis.forEach(w=>{ const s=seasonOf(w); h += `<td class="${w.week===1?'ms':''}">${s?`<span class="sz">${esc(s)}</span>`:''}</td>`; });
+  h += `</tr>`;
   const box = (x)=>{ const p=x.p; const g=REPORT_GROUP[p.status]||'draft'; const pd=reportProduct(p); const cutL=p._sp.a<x.a, cutR=p._sp.b>x.b;
-    return `<div class="pb ${g} ${cutL?'cutL':''} ${cutR?'cutR':''} ${x.b===x.a?'n1':''}" data-id="${p.id}" title="${esc(p.name)}${p.benefit?' · '+esc(p.benefit):''}"><div class="nm"><span class="t">${cutL?'◀ ':''}${esc(p.name)}</span><span class="tag">${REPORT_LABEL[g]}</span><span class="rg">${md(p.start)}~${md(p.end)}${cutR?' ▶':''}</span></div>${p.theme?`<div class="th">${esc(p.theme)}</div>`:''}${pd?`<div class="pd">${esc(pd)}</div>`:'<div class="pd" style="color:var(--faint)">상품 미정</div>'}${p.benefit?`<div class="bf">${esc(p.benefit)}</div>`:''}</div>`; };
+    return `<div class="pb ${g} ${cutL?'cutL':''} ${cutR?'cutR':''} ${x.b===x.a?'n1':''}" data-id="${p.id}" title="${esc(p.name)}${p.benefit?' · '+esc(p.benefit):''}"><div class="nm"><span class="t">${cutL?'◀ ':''}${esc(p.name)}</span><span class="tag">${REPORT_LABEL[g]}</span><span class="rg">${md(p.start)}~${md(p.end)}${cutR?' ▶':''}</span></div>${p.theme?`<div class="th">${esc(p.theme)}</div>`:''}${p.keywords?`<div class="kw">${esc(p.keywords)}</div>`:''}${pd?`<div class="pd">${esc(pd)}</div>`:'<div class="pd" style="color:var(--faint)">상품 미정</div>'}${p.benefit?`<div class="bf">${esc(p.benefit)}</div>`:''}</div>`; };
   chans.forEach(c=>{
     const all = rows.filter(p=>p.channelId===c.id);
-    const items = all.map(p=>({p, a:Math.max(p._sp.a,wa), b:Math.min(p._sp.b,wb)})).filter(x=>x.b>=x.a).sort((x,y)=>x.a-y.a || y.b-x.b);
-    const lanes=[]; items.forEach(x=>{ let L=lanes.find(l=>l.end<x.a); if(!L){ L={end:-1,items:[]}; lanes.push(L); } L.items.push(x); L.end=x.b; });
+    const items = all.map(p=>{ const pr=stepSpan(p); const x={p, a:Math.max(p._sp.a,wa), b:Math.min(p._sp.b,wb)};
+      if(pr && pr.a<=wb && pr.b>=wa && pr.a<Math.max(p._sp.a,wa)){ x.pa=Math.max(pr.a,wa); x.pb=Math.min(pr.b,wb); }
+      x.la = x.pa!=null?x.pa:x.a; return x; }).filter(x=>x.b>=x.a).sort((x,y)=>x.la-y.la || y.b-x.b);
+    const lanes=[]; items.forEach(x=>{ let L=lanes.find(l=>l.end<x.la); if(!L){ L={end:-1,items:[]}; lanes.push(L); } L.items.push(x); L.end=x.b; });
     if(!lanes.length) lanes.push({end:-1,items:[]});
     lanes.forEach((L,li)=>{
       h += `<tr class="lane ${li===lanes.length-1?'chlast':''}">`;
       if(li===0) h += `<td class="chc" rowspan="${lanes.length}"><span class="w">${esc(c.name)}</span>${c.desc?`<span class="r ds" title="${esc(c.desc)}">${esc(c.desc)}</span>`:''}<span class="r">${mFilter>0?`${items.length}건 (이달)`:`${all.length}건`}</span></td>`;
-      const byStart = new Map(L.items.map(x=>[x.a,x]));
+      const byStart = new Map(); L.items.forEach(x=>byStart.set(x.la, x));
       let w=wa;
       while(w<=wb){ const x=byStart.get(w); const ms = WEEKS[w].week===1?'ms':'';
-        if(x){ h += `<td class="bar ${ms}" colspan="${x.b-x.a+1}">${box(x)}</td>`; w=x.b+1; }
+        if(x){
+          if(x.pa!=null){ const pe=Math.min(x.pb, x.a-1); const pn=(x.p.steps||[]).filter(s=>okDate(s.date)&&s.name!=='오픈').map(s=>s.name).join(' · ');
+            h += `<td class="prep ${ms}" colspan="${pe-x.pa+1}" data-id="${x.p.id}" title="준비 일정: ${esc(pn)}"><div class="pz">준비${pn?' · '+esc(pn):''}</div></td>`; w=pe+1; }
+          h += `<td class="bar ${WEEKS[w].week===1?'ms':''}" colspan="${x.b-x.a+1}">${box(x)}</td>`; w=x.b+1;
+        }
         else { h += `<td class="cell ${ms}" data-ch="${c.id}" data-w="${w}"><span class="add">+ 추가</span></td>`; w++; }
       }
       h += `</tr>`;
@@ -1007,12 +1079,13 @@ function renderReport(){
   h += `<tr class="cnt"><td class="chc">동시 진행<span class="r">주당 최대 ${CONCURRENT_MAX}건 기준</span></td>`;
   vis.forEach(w=>{ const cnt=counts[w.idx]; h += `<td class="${cnt>=CONCURRENT_LIMIT?'over':(cnt===CONCURRENT_MAX?'full':'')} ${w.week===1?'ms':''}">${cnt||''}</td>`; });
   h += `</tr></tbody></table></div>`;
-  h += `<div class="rp-note"><span>읽는 법: 한 줄이 한 채널, 한 칸이 한 주입니다. 가로로 이어진 상자가 그 채널에서 진행하는 기획전과 기간이고, 상자 안 아래 줄이 판매 상품입니다. 한 채널에 기획전이 겹치면 줄이 늘어납니다.</span><span>점선 상자(초안)는 9/4 회의 내용으로 잡아 둔 검토안이며 확정 전입니다. 위 월 버튼으로 한 달씩 볼 수 있고, 빈 칸을 누르면 바로 추가, 상자를 누르면 내용 확인·수정.</span></div>`;
+  h += `<div class="rp-note"><span>읽는 법: 한 줄이 한 채널, 한 칸이 한 주입니다. 가로로 이어진 상자가 그 채널에서 진행하는 기획전과 기간이고, 상자 안 아래 줄이 판매 상품입니다. 한 채널에 기획전이 겹치면 줄이 늘어납니다.</span><span>맨 윗줄은 그 주에 걸린 시즌 이슈이고, 기획전 앞의 빗금 칸은 준비 기간(기획 확정 · 소재 제작 · 채널 세팅)입니다. 점선 상자(초안)는 검토안이며 확정 전입니다. 위 월 버튼으로 한 달씩 볼 수 있고, 빈 칸을 누르면 바로 추가, 상자를 누르면 내용 확인·수정.</span></div>`;
   if(mFilter===0) h += `<div class="rp-hint"><span>옆으로 넘기기: 표 아래 가로 스크롤바를 끌기 · 위 ◀ ▶ 버튼 · 빈 곳을 마우스로 잡고 끌기 · Shift + 마우스 휠</span><span>12월까지 한 번에 보려면 "전체 · 한 화면"(기획전명만 표시)</span></div>`;
   const R = $('#report'); R.innerHTML = h;
   const sc = $('.rp-scroll',R); let dragged=false;
   const fitH = ()=>{ const top = sc.getBoundingClientRect().top + window.scrollY; sc.style.maxHeight = Math.max(320, window.innerHeight - top - 14) + 'px'; }; fitH(); if(!S._rpResize){ S._rpResize=true; window.addEventListener('resize', ()=>{ const s=$('#report .rp-scroll'); if(s && document.body.classList.contains('report')) renderReport(); }); }
   $$('.pb[data-id]',R).forEach(el=>el.addEventListener('click', e=>{ e.stopPropagation(); if(dragged) return; openDetail(el.dataset.id); }));
+  $$('td.prep[data-id]',R).forEach(el=>el.addEventListener('click', e=>{ e.stopPropagation(); if(dragged) return; openDetail(el.dataset.id); }));
   $$('td.cell',R).forEach(td=>td.addEventListener('click', ()=>{ if(dragged) return; openQuickForm({channelId:td.dataset.ch, weekIdx:Number(td.dataset.w)}); }));
   // 마우스로 잡고 끌어서 가로 이동
   let dm=null; sc.addEventListener('mousedown', e=>{ if(e.button!==0 || e.target.closest('button,a,input,select')) return; dm={x:e.clientX,y:e.clientY,sl:sc.scrollLeft,st:sc.scrollTop}; dragged=false; });
@@ -1046,7 +1119,9 @@ function openQuickForm(pre){
       <div class="f s3"><label>종료 주차</label><select id="qB">${WEEKS.map(w=>`<option value="${w.idx}" ${w.idx===wb?'selected':''}>${w.month}월 ${w.week}주 (${w.range})</option>`).join('')}</select></div>
       <div class="f s3"><label>상태</label><select id="qSt">${[['검토 중','초안 (검토 중)'],['기획 중','확정 (기획 중)'],['진행 예정','확정 (진행 예정)'],['진행 중','진행 중'],['완료','완료'],['보류','보류'],['취소','취소']].map(([v,l])=>`<option value="${v}" ${E&&E.status===v?'selected':''}>${l}</option>`).join('')}</select></div>
       <div class="f s3"><label>담당자</label><input type="text" id="qOwner" value="${esc(E?E.owner:(pre.owner||''))}" placeholder="이름"></div>
-      <div class="f s12"><label>테마 · 키워드 <span class="hint">(한 줄: 예 "환절기 · 아침 루틴 · 면역")</span></label><input type="text" id="qTheme" value="${esc(E?(E.theme||''):'')}" placeholder="이 기획전을 한마디로"></div>
+      <div class="f s6"><label>테마 <span class="hint">(시즌 이슈와 연결해 한 줄)</span></label><input type="text" id="qTheme" value="${esc(E?(E.theme||''):'')}" placeholder="예: 환절기 아침 루틴"></div>
+      <div class="f s6"><label>검색 키워드 <span class="hint">(쉼표로 구분)</span></label><input type="text" id="qKw" value="${esc(E?(E.keywords||''):'')}" placeholder="예: 환절기 건강식, 아침 대용식"></div>
+      <div class="f s12"><label class="chk" style="margin:0"><input type="checkbox" id="qSteps" ${E&&(E.steps||[]).length?'':'checked'}> 준비 단계를 시작일 기준으로 자동 채우기 (기획 확정 D-17 · 소재 제작 D-10 · 채널 세팅 D-3 · 오픈)</label></div>
       <div class="f s12"><label>판매 상품 <span class="hint">(여러 개 선택 가능 · 목록에 없으면 아래 직접 입력)</span></label><div class="plist" id="qProds">${cats.map(cat=>`<div class="cat">${esc(cat)}</div>`+prods.filter(p=>(p.category||'기타')===cat).map(p=>`<label><input type="checkbox" value="${p.id}" ${selIds.has(p.id)?'checked':''}> ${esc(p.name)} <span class="note">${fmt(masterPrice(p))}원</span></label>`).join('')).join('')}</div>
         <input type="text" id="qManual" value="${esc(manualNames.join(', '))}" placeholder="직접 입력 상품 (쉼표로 구분)" style="margin-top:6px"></div>
       <div class="f s12"><label>핵심 혜택 한 줄 <span class="hint">(예: 2개 구매 시 15% 할인 + 쿨백 증정)</span></label><input type="text" id="qBenefit" value="${esc(E?E.benefit:'')}"></div>
@@ -1058,7 +1133,8 @@ function openQuickForm(pre){
     const a=Number($('#qA',ov).value), b=Math.max(a, Number($('#qB',ov).value));
     const d = E ? clone(E) : newPromotion({channelId:$('#qCh',ov).value, start:WEEKS[a].start, end:WEEKS[b].end});
     if(E){ d.channelId=$('#qCh',ov).value; if(!esp || a!==esp.a) d.start=WEEKS[a].start; if(!esp || b!==esp.b) d.end=WEEKS[b].end; }
-    d.name=name; d.status=$('#qSt',ov).value; d.owner=$('#qOwner',ov).value.trim(); d.benefit=$('#qBenefit',ov).value.trim(); d.theme=$('#qTheme',ov).value.trim();
+    d.name=name; d.status=$('#qSt',ov).value; d.owner=$('#qOwner',ov).value.trim(); d.benefit=$('#qBenefit',ov).value.trim(); d.theme=$('#qTheme',ov).value.trim(); d.keywords=$('#qKw',ov).value.trim();
+    if($('#qSteps',ov).checked) d.steps = autoSteps(d.start); else if(E) d.steps = E.steps||[];
     const keepGifts = E ? giftLines(E) : [];
     d.products = $$('#qProds input:checked',ov).map(cb=>{ const p=productById(cb.value); const it=normalizeLine({kind:p.type==='set'?'set':'single'}); it.productId=p.id; it.name=p.name; it.price=String(masterPrice(p)); it.comp=p.spec||''; if(p.type==='set'){ it.components=clone(p.components||[]); it.comp=compText(it.components); } it.discType='pct'; return it; });
     $('#qManual',ov).value.split(',').map(s=>s.trim()).filter(Boolean).forEach(nm=>{ const old = E ? saleLines(E).find(l=>(!l.productId||l.productId==='__manual') && l.name===nm) : null; if(old){ d.products.push(clone(old)); return; } const it=normalizeLine({kind:'single'}); it.productId='__manual'; it.name=nm; it.discType='pct'; d.products.push(it); });
@@ -1188,7 +1264,7 @@ function newPromotion(pre){
   pre = pre||{};
   const w = pre.weekIdx!=null ? WEEKS[pre.weekIdx] : null;
   return { id:null, name:'', channelId: pre.channelId || (activeSorted(S.channels)[0]||{}).id || '', start: w?w.start:pre.start||`${YEAR}-09-01`, end: w?w.end:pre.end||`${YEAR}-09-07`,
-    status:'아이디어', owner:'', deadline:'', theme:'', criteriaIds:[], purposeIds:[], bg:{why:'',whyChannel:'',link:'',behavior:''},
+    status:'아이디어', owner:'', deadline:'', theme:'', keywords:'', steps:[], criteriaIds:[], purposeIds:[], bg:{why:'',whyChannel:'',link:'',behavior:''},
     target:'', products:[], gift:'', coupon:'', benefit:'',
     goal:{sales:'',qty:'',ad:'',discount:'',giftCost:'',prod:'',fee:'',logistics:'',etc:''},
     checklist: sorted(S.checklist).map(c=>({id:uid('ci'),tplId:c.id,name:c.name,done:false})),
@@ -1197,7 +1273,7 @@ function newPromotion(pre){
 function normalizePromotion(p){ // 예전 데이터·누락 필드 보정
   const n = newPromotion(); const out = Object.assign({}, n, clone(p));
   out.bg = Object.assign({}, n.bg, p.bg||{}); out.goal = Object.assign({}, n.goal, p.goal||{});
-  out.products = (p.products||[]).map(normalizeLine); out.checklist = p.checklist||[]; out.links=p.links||[]; out.files=p.files||[]; out.criteriaIds=p.criteriaIds||[]; out.purposeIds=p.purposeIds||[];
+  out.products = (p.products||[]).map(normalizeLine); out.checklist = p.checklist||[]; out.steps = (p.steps||[]).filter(s=>s&&s.name).map(s=>({name:String(s.name), date: okDate(s.date)?s.date:''})); out.links=p.links||[]; out.files=p.files||[]; out.criteriaIds=p.criteriaIds||[]; out.purposeIds=p.purposeIds||[];
   return out;
 }
 
@@ -1229,10 +1305,15 @@ function openForm(promo, opts){
         <div class="f s6"><label>해당 월 · 주차 (자동 계산)</label><div class="calc" id="cWeek"></div></div>
         <div class="f s3"><label>담당자</label><input type="text" data-k="owner" value="${esc(d.owner)}" list="ownerList" placeholder="이름"></div>
         <div class="f s3"><label>내부 마감일</label><input type="date" data-k="deadline" value="${esc(d.deadline)}"></div>
-        <div class="f s12"><label>테마 · 키워드 <span class="hint">(한 줄: 예 "환절기 · 아침 루틴 · 면역")</span></label><input type="text" data-k="theme" value="${esc(d.theme||'')}" placeholder="이 기획전을 한마디로"></div>
+        <div class="f s6"><label>테마 <span class="hint">(이 기획전을 한마디로: 예 "환절기 아침 루틴")</span></label><input type="text" data-k="theme" value="${esc(d.theme)}" placeholder="시즌 이슈와 연결해 한 줄로"></div>
+        <div class="f s6"><label>검색 키워드 <span class="hint">(쉼표로 구분: 예 "환절기 건강식, 아침 대용식, 다이어트 쉐이크")</span></label><input type="text" data-k="keywords" value="${esc(d.keywords||'')}" placeholder="상품 등록·광고에 쓸 키워드"></div>
         <div class="f s6"><label>동시 진행 확인</label><div class="calc" id="cConc"></div></div>
       </div>
       <datalist id="ownerList">${Array.from(new Set(S.promotions.map(p=>(p.owner||'').trim()).filter(Boolean))).map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+    </div>
+    <div class="sec"><h3>준비 단계 <span class="hint">오픈 전에 끝내야 하는 일정 · 메인 화면에 준비 기간으로 표시됩니다</span></h3>
+      <div id="stepBox"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button type="button" class="btn xs" id="stepAuto">시작일 기준 자동 계산</button><button type="button" class="btn xs ghost" id="stepAdd">+ 단계 추가</button><span class="note">기본: 기획 확정 D-17 · 소재 제작 D-10 · 채널 세팅 D-3 · 오픈</span></div>
     </div>
     <div class="sec"><h3>기획전 기준 <span class="hint">왜 이 기획전을 하게 되었는지 · 복수 선택</span></h3>
       <div class="chips" id="critChips"></div>
@@ -1301,7 +1382,7 @@ function openForm(promo, opts){
         <div class="f s6"><label>관련 파일 또는 이미지 <span class="hint">파일당 200KB 이하 · 큰 파일은 링크로 등록</span></label><ul class="files" id="fileList"></ul><input type="file" id="fileInput" multiple accept="image/*,.pdf,.xlsx,.pptx,.docx,.txt,.csv" style="font-size:12px"></div>
       </div>
     </div>`;
-    renderChips(); renderProducts(); renderChecklist(); renderLinks(); renderFiles(); recalc();
+    renderChips(); renderSteps(); renderProducts(); renderChecklist(); renderLinks(); renderFiles(); recalc();
     // 입력 바인딩
     $$('[data-k]', body).forEach(el=>{
       const ev = (el.tagName==='SELECT' || el.type==='date') ? 'change' : 'input';
@@ -1330,6 +1411,18 @@ function openForm(promo, opts){
       if(changed==='start'){ d.end = d.start; $('[data-k="end"]',body).value=d.end; } else { d.start = d.end; $('[data-k="start"]',body).value=d.start; }
     }
   }
+  function renderSteps(){
+    const box = $('#stepBox',body); if(!box) return;
+    const rows = (d.steps||[]);
+    box.innerHTML = rows.length ? rows.map((s,i)=>`<div class="steprow" data-si="${i}"><input type="text" data-sk="name" value="${esc(s.name)}" placeholder="단계 이름"><input type="date" data-sk="date" value="${esc(s.date||'')}"><span class="note dd" data-dd></span><button type="button" class="rm" data-srm title="삭제">&times;</button></div>`).join('')
+      : '<div class="note">아직 준비 단계가 없습니다. "시작일 기준 자동 계산"을 누르면 기획 확정 · 소재 제작 · 채널 세팅 · 오픈 4단계가 채워집니다.</div>';
+    $$('.steprow',box).forEach(r=>{ const i=Number(r.dataset.si);
+      const dd=$('[data-dd]',r); const sd=d.steps[i].date;
+      if(dd && okDate(sd) && okDate(d.start)){ const diff=Math.round((parseISO(d.start)-parseISO(sd))/86400000); dd.textContent = diff>0?`오픈 D-${diff}`:(diff===0?'오픈일':`오픈 +${-diff}일`); }
+      $$('[data-sk]',r).forEach(inp=>inp.addEventListener('input', ()=>{ d.steps[i][inp.dataset.sk]=inp.value; renderSteps(); autosave(); }));
+      $('[data-srm]',r).addEventListener('click', ()=>{ d.steps.splice(i,1); renderSteps(); autosave(); });
+    });
+  }
   function renderChips(){
     const cw = $('#critChips',body);
     cw.innerHTML = sorted(S.criteria).filter(c=>c.active!==false || d.criteriaIds.includes(c.id)).map(c=>`<button type="button" class="chip ${d.criteriaIds.includes(c.id)?'on':''}" data-cid="${c.id}" style="--tc:${c.color}" title="${esc(c.desc||'')}"><i></i>${esc(c.name)}${c.active===false?' (비활성)':''}</button>`).join('') + `<button type="button" class="chip add" id="critAddBtn">+ 새로운 기준 추가</button>`;
@@ -1340,6 +1433,9 @@ function openForm(promo, opts){
     $$('[data-pid]',pw).forEach(b=>b.addEventListener('click', ()=>{ const id=b.dataset.pid; d.purposeIds = d.purposeIds.includes(id)? d.purposeIds.filter(x=>x!==id) : d.purposeIds.concat(id); renderChips(); autosave(); }));
     $('#purAddBtn',pw).addEventListener('click', ()=>{ $('#purAdd',body).hidden=false; $('#purName',body).focus(); });
   }
+  { const sa=$('#stepAuto',body), sd=$('#stepAdd',body);
+    if(sa) sa.addEventListener('click', ()=>{ if(!okDate(d.start)){ toast('시작일을 먼저 입력하세요'); return; } d.steps = autoSteps(d.start); renderSteps(); autosave(); toast('준비 단계를 채웠습니다'); });
+    if(sd) sd.addEventListener('click', ()=>{ d.steps = d.steps||[]; d.steps.push({name:'', date:''}); renderSteps(); autosave(); }); }
   async function addCriterionInline(){
     const name = $('#critName',body).value.trim(); if(!name){ $('#critName',body).focus(); return; }
     const dup = S.criteria.find(c=>c.name===name);
@@ -1375,7 +1471,8 @@ function openForm(promo, opts){
     else { it.comp = p.spec||''; if(it.kind!=='event') it.kind='single'; }
     if(it.discType==='price' && (it.salePrice===''||it.salePrice==null)) it.salePrice = it.price;
   }
-  function lineCalcHTML(it){ const s=lineSalePrice(it), pct=lineDiscPct(it); return `<span class="calc-sale num">${fmt(s)}원</span><span class="calc-disc num">${pct!=null?pct+'% 할인':'-'}</span>`; }
+  function lineCalcHTML(it){ const s=lineSalePrice(it), pct=lineDiscPct(it); const p=it.productId&&it.productId!=='__manual'?productById(it.productId):null; const fl=floorPrice(p);
+    return `<span class="calc-sale num">${fmt(s)}원</span><span class="calc-disc num">${pct!=null?pct+'% 할인':'-'}</span>${fl?`<span class="calc-floor ${s&&s<fl?'bad':''}">최저 ${fmt(fl)}원</span>`:''}`; }
   function giftCostEstimate(){ const q=num(d.goal.qty)||saleLines(d).reduce((s,l)=>s+num(l.qty),0); return giftLines(d).reduce((s,g)=>s+num(g.cost)*num(g.qty||1),0)*q; }
   function renderProducts(){
     const L = $('#lineList',body), G = $('#giftList',body);
@@ -1401,6 +1498,7 @@ function openForm(promo, opts){
           <label>사용 가능 재고<input type="number" min="0" data-lk="stock" value="${esc(it.stock)}"></label>
           <label>목표 판매수량<input type="number" min="0" data-lk="qty" value="${esc(it.qty)}"></label>
         </div>
+        ${lineFloorWarn(it)?`<div class="floorwarn">${esc(lineFloorWarn(it))}</div>`:''}
       </div>`; }).join('') || '<div class="note" style="padding:6px 0">판매 상품을 추가하세요. 상품 마스터에서 고르면 단가와 구성이 자동으로 채워집니다.</div>';
     G.innerHTML = gifts.map(({it,i})=>`<div class="line gift" data-i="${i}">
         <div class="lrow"><span class="lkind event">이벤트</span><select data-lk="productId" class="lsel">${productOptions('event', it.productId)}</select><input type="text" data-lk="name" value="${esc(it.name)}" placeholder="사은품 · 포장 · 샘플명" class="lname"><button type="button" class="rm" title="삭제">×</button></div>
@@ -1414,7 +1512,11 @@ function openForm(promo, opts){
         const handler = ()=>{
           if(k==='productId'){ const v=inp.value; if(v && v!=='__manual'){ const p=productById(v); if(p) applyMaster(it,p); } else { it.productId=v; if(it.kind==='set' && v===''){ it.components = it.components&&it.components.length?it.components:[{productId:'',qty:1}]; } } renderProducts(); recalc(); autosave(); return; }
           if(k==='discType'){ it.discType=inp.value; if(it.discType==='price' && (it.salePrice===''||it.salePrice==null)) it.salePrice=lineSalePrice(Object.assign({},it,{discType:'pct'})); renderProducts(); recalc(); autosave(); return; }
-          it[k]=inp.value; const c=$('[data-calc]',ln); if(c) c.innerHTML=lineCalcHTML(it); recalc(); autosave();
+          it[k]=inp.value; const c=$('[data-calc]',ln); if(c) c.innerHTML=lineCalcHTML(it);
+          const fw=lineFloorWarn(it); let fwEl=$('.floorwarn',ln);
+          if(fw && !fwEl){ fwEl=document.createElement('div'); fwEl.className='floorwarn'; ln.appendChild(fwEl); }
+          if(fwEl){ if(fw) fwEl.textContent=fw; else fwEl.remove(); }
+          recalc(); autosave();
         };
         inp.addEventListener(inp.tagName==='SELECT'?'change':'input', handler);
       });
@@ -1541,7 +1643,8 @@ function openDetail(id){
     <div class="mh"><div><h2>${esc(p.name)} <span class="tag dtag ${grp}">${REPORT_LABEL[grp]}</span></h2><div class="sub">${esc(ch?ch.name:'-')} · ${md(p.start)} ~ ${md(p.end)} (${wl})${p.owner?' · '+esc(p.owner):''}</div></div><span class="spacer"></span><button type="button" class="btn sm ghost" data-close>닫기</button></div>
     <div class="mb dv2">
       <div class="dgrid">
-        <div class="dk">테마 · 키워드</div><div class="dvv">${p.theme?esc(p.theme):(crit.length?esc(crit.map(c=>c.name).join(' · ')):'<span class="note">미정</span>')}</div>
+        <div class="dk">테마 · 키워드</div><div class="dvv">${p.theme?esc(p.theme):(crit.length?esc(crit.map(c=>c.name).join(' · ')):'<span class="note">미정</span>')}${p.keywords?`<div class="note">키워드 ${esc(p.keywords)}</div>`:''}</div>
+        ${(p.steps||[]).length?`<div class="dk">준비 일정</div><div class="dvv">${p.steps.filter(s=>s.name).map(s=>`${esc(s.name)} ${s.date?md(s.date):'-'}`).join(' → ')}</div>`:''}
         <div class="dk">판매 상품</div><div class="dvv">${prodRows||'<span class="note">상품 미정</span>'}${giftRows}</div>
         <div class="dk">혜택</div><div class="dvv">${p.benefit?esc(p.benefit):'<span class="note">미정</span>'}${p.coupon?`<div class="note" title="${esc(p.coupon)}">쿠폰 · ${esc(short(p.coupon,60))}</div>`:''}</div>
         ${(b.total>0||b.sales>0)?`<div class="dk">예산 · 목표</div><div class="dvv">${b.total>0?`투입 예산 ${won(b.total)}`:''}${b.sales>0?`${b.total>0?' · ':''}목표 매출 ${won(b.sales)}`:''}${b.roas!=null?` · ROAS ${b.roas.toFixed(1)}배`:''}</div>`:''}
@@ -1727,7 +1830,7 @@ function openProducts(opts){
   ov._onClose = ()=>{ if(opts.onClose) opts.onClose(); };
   $$('#pmTabs button',ov).forEach(b=>b.addEventListener('click', ()=>{ typeFilter=b.dataset.t; $$('#pmTabs button',ov).forEach(x=>x.classList.toggle('on',x===b)); renderList(); }));
   $('#pmQ',ov).addEventListener('input', debounce(e=>{ q=e.target.value.trim().toLowerCase(); renderList(); },150));
-  $('#pmNew',ov).addEventListener('click', ()=>{ curId=null; draft={id:null,name:'',type:typeFilter||'single',category:'',spec:'',price:'',cost:'',stock:'',note:'',components:[],priceMode:'manual',active:true,order:S.products.length}; renderList(); renderEdit(); });
+  $('#pmNew',ov).addEventListener('click', ()=>{ curId=null; draft={id:null,name:'',type:typeFilter||'single',category:'',spec:'',price:'',cost:'',floor:'',stock:'',note:'',components:[],priceMode:'manual',active:true,order:S.products.length}; renderList(); renderEdit(); });
   function renderList(){
     const list = sorted(S.products).filter(p=>(!typeFilter||p.type===typeFilter) && (!q || (p.name||'').toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q)));
     const groups={}; list.forEach(p=>{ const k=PRODUCT_TYPES[p.type]+' · '+(p.category||'기타'); (groups[k]=groups[k]||[]).push(p); });
@@ -1751,6 +1854,8 @@ function openProducts(opts){
       <div class="f s4"><label>${p.type==='event'?'판매가 (있을 때)':'정상 단가 (평소 판매 단가)'}</label><input type="number" min="0" data-pm="price" value="${esc(p.type==='set'&&p.priceMode==='auto'?componentsSum(p.components):p.price)}" ${p.type==='set'&&p.priceMode==='auto'?'disabled':''}></div>
       <div class="f s4"><label>원가 ${p.type==='event'?'(사은품 원가 계산에 사용)':'(선택)'}</label><input type="number" min="0" data-pm="cost" value="${esc(p.cost)}"></div>
       <div class="f s4"><label>가용 재고 (참고)</label><input type="number" min="0" data-pm="stock" value="${esc(p.stock)}"></div>
+      <div class="f s4"><label>최저 판매가 ${p.type==='set'?'(세트는 보통 비워 둠)':'(이 아래로 단품 판매 불가)'}</label><input type="number" min="0" data-pm="floor" value="${esc(p.floor||'')}" placeholder="예: 29900"></div>
+      <div class="f s12"><div class="pricepolicy">가격 정책: 최저 판매가는 총판·거래처 관계상 단품으로 내릴 수 있는 하한선입니다(용산 팝업 판매가 기준). 이보다 싸게 주고 싶으면 가격을 내리지 말고 세트로 묶거나 사은품을 얹습니다. 세트는 어느 품목을 얼마나 깎았는지 드러나지 않으므로 묶음 단위로 더 큰 할인이 가능합니다.</div></div>
       <div class="f s12"><label>행사 할인 미리보기</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input type="number" min="0" max="100" id="pmDisc" placeholder="할인율 %" style="width:110px"><span class="note">적용 시 판매금액</span><span class="calc-sale num" id="pmDiscOut">-</span><span class="note" id="pmDiscNote"></span></div></div>
       <div class="f s12"><label>메모 (주의 표현, 판매 상태 등)</label><input type="text" data-pm="note" value="${esc(p.note)}"></div>
       <div class="f s12" style="flex-direction:row;align-items:center;gap:12px"><label class="chk"><input type="checkbox" data-pm="active" ${p.active!==false?'checked':''}> 활성 (기획전 상품 선택 목록에 표시)</label><span class="note">사용 중인 기획전 ${used}건</span></div>
@@ -1760,11 +1865,11 @@ function openProducts(opts){
     $$('.crow',E).forEach(cr=>{ const ci=Number(cr.dataset.ci); $$('[data-ck]',cr).forEach(inp=>inp.addEventListener('change', ()=>{ p.components[ci][inp.dataset.ck]= inp.dataset.ck==='qty'?num(inp.value):inp.value; renderEdit(); })); $('[data-crm]',cr).addEventListener('click', ()=>{ p.components.splice(ci,1); renderEdit(); }); });
     const cadd=$('#pmCadd',E); if(cadd) cadd.addEventListener('click', ()=>{ p.components.push({productId:'',qty:1}); renderEdit(); });
     $$('input[name=pmMode]',E).forEach(r=>r.addEventListener('change', ()=>{ p.priceMode=r.value; if(p.priceMode==='manual' && !num(p.price)) p.price=String(componentsSum(p.components)); renderEdit(); }));
-    const updateDisc=()=>{ const base = p.type==='set'&&p.priceMode==='auto'?componentsSum(p.components):num(p.price); const v=num($('#pmDisc',E).value); const out=$('#pmDiscOut',E); if(!base){ out.textContent='-'; $('#pmDiscNote',E).textContent='정상 단가를 먼저 입력하세요'; return; } const s=round10(base*(1-v/100)); out.textContent=fmt(s)+'원'; $('#pmDiscNote',E).textContent = v? `정상 ${fmt(base)}원 - ${v}% = 할인액 ${fmt(base-s)}원` : `정상 ${fmt(base)}원 (할인율을 입력하세요)`; };
+    const updateDisc=()=>{ const base = p.type==='set'&&p.priceMode==='auto'?componentsSum(p.components):num(p.price); const v=num($('#pmDisc',E).value); const out=$('#pmDiscOut',E); if(!base){ out.textContent='-'; $('#pmDiscNote',E).textContent='정상 단가를 먼저 입력하세요'; return; } const s=round10(base*(1-v/100)); out.textContent=fmt(s)+'원'; const fl=num(p.floor); const under = fl && v && s<fl; $('#pmDiscNote',E).textContent = (v? `정상 ${fmt(base)}원 - ${v}% = 할인액 ${fmt(base-s)}원` : `정상 ${fmt(base)}원 (할인율을 입력하세요)`) + (fl?` · 최저 판매가 ${fmt(fl)}원${under?' → 단품으로는 불가, 세트·사은품으로':''}`:''); out.style.color = under? 'var(--danger)':''; };
     $('#pmDisc',E).addEventListener('input', updateDisc); updateDisc();
     $('#pmSave',E).addEventListener('click', async ()=>{
       if(!(p.name||'').trim()){ toast('상품명을 입력하세요'); return; }
-      const doc = clone(p); if(!doc.id) doc.id=uid('pd'); doc.name=doc.name.trim(); doc.price = doc.type==='set'&&doc.priceMode==='auto'?componentsSum(doc.components):num(doc.price); doc.cost=num(doc.cost); doc.components=(doc.components||[]).filter(c=>c.productId).map(c=>({productId:c.productId,qty:num(c.qty)||1}));
+      const doc = clone(p); if(!doc.id) doc.id=uid('pd'); doc.name=doc.name.trim(); doc.price = doc.type==='set'&&doc.priceMode==='auto'?componentsSum(doc.components):num(doc.price); doc.cost=num(doc.cost); doc.floor=num(doc.floor); doc.components=(doc.components||[]).filter(c=>c.productId).map(c=>({productId:c.productId,qty:num(c.qty)||1}));
       if(doc.type==='set' && !doc.spec) doc.spec = compText(doc.components);
       if(doc.type!=='set'){ doc.components=[]; doc.priceMode='manual'; }
       const i=S.products.findIndex(x=>x.id===doc.id); if(i>=0) S.products[i]=doc; else S.products.push(doc);
@@ -1802,11 +1907,15 @@ function _buildPromptHead(ctx){
   L.push('- 채널·기준·목적·상품은 반드시 참고 데이터의 id를 사용합니다. 꼭 필요한데 목록에 없는 기준·목적은 새 이름 문자열로 넣을 수 있습니다 (대시보드가 자동 등록).');
   L.push(`- 기간은 ${YEAR}년 9월 1일 ~ 12월 31일 안에서 잡습니다. 대시보드는 각 월을 1~7일 / 8~14일 / 15~21일 / 22~28일 / 29일~말일의 5주차로 나눕니다.`);
   L.push(`- 동시 진행 기획전은 전 채널 합산 최대 ${CONCURRENT_MAX}건까지입니다(디자인·운영 부하 기준). ${CONCURRENT_LIMIT}건 이상 겹치면 리스크로 표시하므로, 아래 "현재 등록된 기획전"을 보고 겹침을 피하거나 근거를 적습니다.`);
+  L.push('- 가격 정책(중요): 상품마다 최저 판매가가 있고 이는 총판·거래처 관계상 단품으로 내릴 수 있는 하한선입니다. 단품 행사가는 절대 이 값 아래로 잡지 않습니다. 더 큰 혜택이 필요하면 (1) 여러 상품을 묶은 세트를 만들어 묶음 단위로 할인하거나(구성품별로 얼마를 깎았는지 드러나지 않음), (2) 가격은 그대로 두고 사은품을 얹거나, (3) 채널 쿠폰을 씁니다. 세트에는 최저 판매가 제한을 적용하지 않습니다.');
   L.push('- 상품 가격: 정상 단가는 참고 데이터의 price를 그대로 쓰고, 할인은 discount {type: pct(할인율) | amt(할인액) | price(행사가 직접), value}로 표현합니다. 행사가는 10원 단위로 반올림합니다.');
   L.push('- 세트 상품은 참고 데이터의 세트(type set)를 쓰거나, components에 구성품 productId와 qty를 넣어 새로 구성합니다. 새 세트의 price를 비우면 구성품 정상가 합계가 정상 단가가 됩니다.');
   L.push('- 이벤트 상품(type event)은 사은품·포장·샘플입니다. qtyPerOrder(주문당 수량), cost(단위 원가), condition(지급 조건)을 적습니다.');
   L.push('- 예산: 이 기획전을 위해 추가로 투입하는 비용만 넣습니다. goal.ad(광고비), goal.discount(쿠폰·할인 분담금 중 실제 지급분), goal.giftCost(새로 구매하는 사은품 구매비), goal.prod(외주 디자인·콘텐츠 제작비), goal.fee(오픈마켓 기획전 구좌·노출 비용), goal.logistics(추가 물류비), goal.etc(기타). 상품 할인에 따른 매출 감소분, 기존 재고를 사은품으로 쓰는 원가, 판매 수수료는 예산에 넣지 않습니다(0). 총예산 = 위 항목 합계, 예상 ROAS = 목표 매출 ÷ 총예산. 금액을 모르면 0으로 두고 memo에 "확정 필요"라고 적습니다.');
   L.push('- 고객 노출 문구(혜택, 상품 설명)는 짧고 객관적으로 씁니다. 질병 예방·치료 효능 표현, 최상급 표현(1위·최고), 라벨 근거가 없는 수치는 쓰지 않습니다. 브랜드 가치와 원료 출처가 자연스럽게 드러나되 의학적 효능 주장으로 읽히지 않게 합니다.');
+  L.push('- 시즌 이슈를 먼저 잡고 그 이슈에 맞춰 기획전을 만듭니다. 아래 "월·주차별 시즌 이슈"를 보고, theme에 그 이슈와 연결한 한 줄을 씁니다. 한 달에 컨셉이 명확한 메인 기획전 2건 정도면 충분합니다.');
+  L.push('- keywords에는 상품 등록·광고에 쓸 검색 키워드를 쉼표로 구분해 3~6개 적습니다.');
+  L.push('- steps에는 준비 단계를 [{name, date}] 형식으로 넣습니다. 기본은 기획 확정(오픈 D-17) · 소재 제작(D-10) · 채널 세팅(D-3) · 오픈(시작일) 4단계입니다.');
   L.push('- 상태는 아래 진행 상태 목록 중 하나를 쓰고, 새 기획이면 보통 "아이디어" 또는 "검토 중"으로 둡니다.');
   L.push('');
   L.push('## 참고 데이터');
@@ -1818,6 +1927,8 @@ function _buildPromptHead(ctx){
   return L;
 }
 function refDataLines(L){
+  L.push('### 월·주차별 시즌 이슈');
+  WEEKS.forEach(w=>{ const s=seasonOf(w); if(s) L.push(`- ${w.month}월 ${w.week}주 (${w.range}) | ${s}`); });
   L.push('### 판매 채널 (id | 채널명 | 성격)');
   sorted(S.channels).filter(c=>c.active!==false).forEach(c=>L.push(`- ${c.id} | ${c.name} | ${c.desc||''}`));
   L.push('### 기획전 기준 (id | 기준명 | 설명) - 복수 선택');
@@ -1828,10 +1939,10 @@ function refDataLines(L){
   L.push('- '+STATUSES.join(' / '));
   L.push('### 기본 체크리스트 (실행 준비 항목)');
   sorted(S.checklist).forEach(c=>L.push(`- ${c.name}`));
-  L.push('### 상품 마스터 (id | 유형 | 상품명 | 규격·구성 | 정상 단가(원) | 원가(원) | 메모)');
+  L.push('### 상품 마스터 (id | 유형 | 상품명 | 규격·구성 | 정상 단가(원) | 최저 판매가(원) | 원가(원) | 메모)');
   sorted(S.products).filter(p=>p.active!==false).forEach(p=>{
     const comp = p.type==='set' ? ' | 구성: '+(p.components||[]).map(c=>c.productId+' x '+c.qty).join(', ') : '';
-    L.push(`- ${p.id} | ${PRODUCT_TYPES[p.type]} | ${p.name} | ${p.spec||''} | ${fmt(masterPrice(p))} | ${fmt(p.cost)}${p.note?' | '+p.note:''}${comp}`);
+    L.push(`- ${p.id} | ${PRODUCT_TYPES[p.type]} | ${p.name} | ${p.spec||''} | ${fmt(masterPrice(p))} | ${p.floor?fmt(p.floor):'-'} | ${fmt(p.cost)}${p.note?' | '+p.note:''}${comp}`);
   });
 }
 function _buildPromptTail(L, ctx){
@@ -1872,6 +1983,7 @@ function buildEditPromptText(p){
   L.push('아래 "현재 기획전" JSON이 지금 보드에 등록된 내용입니다. 사용자가 무엇을 바꾸고 싶은지 말하면(예: 상품 구성, 행사가, 혜택, 기간, 테마), 그 부분만 고치고 나머지는 유지해서 같은 형식의 JSON 하나로 다시 출력하세요.');
   L.push('- id 값은 절대 바꾸지 마세요. 보드가 id로 기존 기획전을 찾아 덮어씁니다.');
   L.push('- 상품은 참고 데이터의 productId를 쓰고, 마스터에 없으면 name만 적습니다. 행사가는 discount {type: pct|amt|price, value}로 표현합니다.');
+  L.push('- 가격 정책(중요): 상품마다 최저 판매가가 있고 이는 총판·거래처 관계상 단품으로 내릴 수 있는 하한선입니다. 단품 행사가는 절대 이 값 아래로 잡지 않습니다. 더 큰 혜택이 필요하면 (1) 여러 상품을 묶은 세트를 만들어 묶음 단위로 할인하거나(구성품별로 얼마를 깎았는지 드러나지 않음), (2) 가격은 그대로 두고 사은품을 얹거나, (3) 채널 쿠폰을 씁니다. 세트에는 최저 판매가 제한을 적용하지 않습니다.');
   L.push('- 예산(goal)은 이 기획전을 위해 추가로 투입하는 비용만 넣습니다. 할인에 따른 매출 감소분, 기존 재고 사은품 원가, 판매 수수료는 0으로 둡니다.');
   L.push('- theme은 테마·키워드 한 줄, benefit은 고객 혜택 한 문장입니다. 질병 예방·치료 효능 표현과 최상급 표현은 쓰지 않습니다.');
   L.push('- 사용자가 아직 지시를 하지 않았다면, 이 기획전에서 비어 있거나 "미정"인 부분(상품 구성, 혜택 수준, 테마)을 먼저 짚어 주고 무엇을 정해야 하는지 3~5개 질문으로 물어보세요.');
@@ -1889,7 +2001,7 @@ function buildEditPromptText(p){
 }
 function exportPromotionJSON(p){ // 대시보드 → 파일 형식
   const n = normalizePromotion(p);
-  return { id:n.id||undefined, name:n.name, theme:n.theme||'', channel:n.channelId, start:n.start, end:n.end, status:n.status, owner:n.owner, deadline:n.deadline, criteria:n.criteriaIds, purposes:n.purposeIds, background:n.bg, target:n.target,
+  return { id:n.id||undefined, name:n.name, theme:n.theme||'', keywords:n.keywords||'', steps:(n.steps||[]).filter(s=>s.name).map(s=>({name:s.name,date:s.date||''})), channel:n.channelId, start:n.start, end:n.end, status:n.status, owner:n.owner, deadline:n.deadline, criteria:n.criteriaIds, purposes:n.purposeIds, background:n.bg, target:n.target,
     products: n.products.map(l=> l.kind==='event' ? {type:'event', productId:l.productId||undefined, name:l.name, qtyPerOrder:num(l.qty)||1, cost:num(l.cost), condition:l.cond, stock:l.stock===''?undefined:num(l.stock)} : {type:l.kind, productId:l.productId&&l.productId!=='__manual'?l.productId:undefined, name:l.name, comp:l.comp, components:l.kind==='set'?(l.components||[]).map(c=>({productId:c.productId,qty:num(c.qty)||1})):undefined, price:num(l.price), discount:{type:l.discType||'price', value: l.discType==='price'?lineSalePrice(l):num(l.discVal)}, stock:l.stock===''?undefined:num(l.stock), targetQty:l.qty===''?undefined:num(l.qty)}),
     gift:n.gift, coupon:n.coupon, benefit:n.benefit, goal:Object.fromEntries(Object.keys(n.goal).map(k=>[k,num(n.goal[k])])), checklist:n.checklist.map(c=>({name:c.name,done:!!c.done})), memo:n.memo, links:n.links.map(l=>({title:l.title,url:l.url})), contact:n.contact };
 }
@@ -1920,7 +2032,7 @@ function importOne(src, warnings, pending){ // src: 파일 형식 한 건 → �
   if(okDate(src.end)) d.end=src.end; else { d.end=addDays(d.start,6); warnings.push('종료일 형식이 잘못되어 시작일 + 6일로 넣습니다.'); }
   if(d.end<d.start){ d.end=d.start; warnings.push('종료일이 시작일보다 빨라 시작일과 같게 맞췄습니다.'); }
   d.status = STATUSES.includes(src.status)?src.status:'아이디어'; if(src.status && !STATUSES.includes(src.status)) warnings.push(`상태 "${src.status}"는 목록에 없어 아이디어로 넣습니다.`);
-  d.owner = String(src.owner||''); d.deadline = okDate(src.deadline)?src.deadline:''; d.theme = String(src.theme||''); d._srcId = src.id && S.promotions.some(p=>p.id===src.id) ? src.id : null;
+  d.owner = String(src.owner||''); d.deadline = okDate(src.deadline)?src.deadline:''; d.theme = String(src.theme||''); d.keywords = String(src.keywords||''); d.steps = Array.isArray(src.steps)? src.steps.filter(s=>s&&s.name).map(s=>({name:String(s.name), date: okDate(s.date)?s.date:''})) : (okDate(d.start)?autoSteps(d.start):[]); d._srcId = src.id && S.promotions.some(p=>p.id===src.id) ? src.id : null;
   const mapTerms = (arr, list, kind)=> (Array.isArray(arr)?arr:[]).map(v=>{ const f=findByIdOrName(list, v); if(f) return f.id; const name=String(v||'').trim(); if(!name) return null; const key=kind+':'+name; if(!pending[key]) pending[key]={kind,name}; return key; }).filter(Boolean);
   d.criteriaIds = mapTerms(src.criteria||src.criteriaIds, S.criteria, 'criteria');
   d.purposeIds = mapTerms(src.purposes||src.purposeIds, S.purposes, 'purposes');
@@ -2045,7 +2157,7 @@ async function boot(){
   const t = weekIndexOf(todayISO()); if(t!=null && t>=0 && t<WEEKS.length){ const wrap=$('#calwrap'); const c1=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--c1')), c2=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--c2')), wk=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--wk')); wrap.scrollLeft = Math.max(0, t*wk - wk); void c1; void c2; }
 }
 // 테스트·외부 연동용 최소 API
-window.MDBoard = { get state(){ return S; }, WEEKS, weekIndexOf, budgetOf, openForm:(pre)=>openForm(newPromotion(pre||{})), openDetail, openSettings, openProducts, openPromptBuilder, openImportPromo, buildPromptText, importOne, lineSalePrice, masterPrice };
+window.MDBoard = { get state(){ return S; }, WEEKS, weekIndexOf, budgetOf, autoSteps, seasonOf, floorPrice, SEASON_ISSUES, openForm:(pre)=>openForm(newPromotion(pre||{})), openDetail, openSettings, openProducts, openPromptBuilder, openImportPromo, buildPromptText, importOne, lineSalePrice, masterPrice };
 boot();
 })();
 </script>
