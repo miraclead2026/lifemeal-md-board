@@ -1481,6 +1481,7 @@ function openDetail(id){
         <button type="button" class="btn primary" id="dQuick">수정</button>
         <label class="note">상태 <select id="dStatus" style="padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface)">${STATUSES.map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`).join('')}</select></label>
         <button type="button" class="btn" id="dDup">복제</button>
+        <button type="button" class="btn" id="dAi">AI로 수정 (파일)</button>
         <button type="button" class="btn ghost" id="dMore">자세히 (예산 · 체크리스트 · 메모)</button>
         <span class="spacer"></span>
         <button type="button" class="btn" id="dArch">${p.archived?'보관 해제':'보관'}</button>
@@ -1510,6 +1511,7 @@ function openDetail(id){
       </div>
     </div>`);
   $('#dQuick',ov).addEventListener('click', ()=>{ closeModal(ov); openQuickForm({edit:p}); });
+  $('#dAi',ov).addEventListener('click', ()=>{ closeModal(ov); openAiEdit(p); });
   $('#dEdit',ov).addEventListener('click', ()=>{ closeModal(ov); openForm(p); });
   $('#dMore',ov).addEventListener('click', ()=>{ const f=$('#dFull',ov); f.hidden=!f.hidden; $('#dMore',ov).textContent = f.hidden ? '자세히 (예산 · 체크리스트 · 메모)' : '간단히'; });
   $('#dDup',ov).addEventListener('click', ()=>{ closeModal(ov); duplicatePromotion(p); });
@@ -1518,6 +1520,23 @@ function openDetail(id){
   $('#dDel',ov).addEventListener('click', ()=>{ const c=$('#dDelConfirm',ov); c.innerHTML=`<span class="confirm">정말 삭제할까요? <button type="button" class="btn xs danger" id="dDelYes">삭제</button><button type="button" class="btn xs ghost" id="dDelNo">취소</button></span>`; $('#dDelYes',ov).addEventListener('click', async ()=>{ await S.store.remove('promotions', p.id); closeModal(ov); toast('삭제했습니다'); }); $('#dDelNo',ov).addEventListener('click', ()=>{ c.innerHTML=''; }); });
   $('#mvGo',ov).addEventListener('click', async ()=>{ const o={channelId:$('#mvCh',ov).value, start:$('#mvStart',ov).value, end:$('#mvEnd',ov).value}; const n=await movePromotion(p,o); toast('이동했습니다'); closeModal(ov); openDetail(n.id); });
   $$('#dCl input, #dTodo input',ov).forEach(cb=>cb.addEventListener('change', async ()=>{ p.checklist[Number(cb.dataset.i)].done=cb.checked; cb.parentElement.classList.toggle('done',cb.checked); await savePromotion(p); }));
+}
+
+/* AI로 수정: 현재 내용을 파일로 받아 Claude에 넣고, 고친 파일을 다시 넣어 같은 기획전을 업데이트 */
+function openAiEdit(p){
+  const txt = buildEditPromptText(p);
+  const fname = `기획전_${p.name.replace(/[\\/:*?"<>|]/g,'_')}_수정요청.md`;
+  const ov = openModal(`<div class="mh"><div><h2>AI로 수정 - ${esc(p.name)}</h2><div class="sub">지금 등록된 내용을 파일로 받아 Claude에 넣고, 돌려받은 파일을 다시 넣으면 이 기획전이 그 내용으로 바뀝니다.</div></div><span class="spacer"></span><button type="button" class="btn sm ghost" data-close>닫기</button></div>
+    <div class="mb">
+      <div class="sec"><h3>1. 파일 받기</h3><p class="note">이 기획전의 현재 내용과 상품 목록, 수정 규칙이 들어 있습니다. Claude(claude.ai) 대화창에 파일을 올리거나 내용을 붙여 넣고, 바꾸고 싶은 점을 말하세요. 예: "상품을 데일리 14포와 닥터샐러드로 바꾸고 15% 할인으로", "혜택 문구를 더 짧게".</p>
+        <div style="display:flex;gap:8px;margin:8px 0"><button type="button" class="btn primary" id="aeDl">파일로 저장 (.md)</button><button type="button" class="btn" id="aeCopy">내용 복사</button></div></div>
+      <div class="sec"><h3>2. 고친 파일 넣기</h3><p class="note">Claude가 돌려준 JSON 파일(또는 코드 블록 텍스트)을 넣으면 미리보기가 뜨고, "기존 기획전 업데이트"에 체크된 상태로 등록하면 이 기획전이 덮어써집니다. 새 기획전으로 따로 두고 싶으면 체크를 해제하세요.</p>
+        <div style="margin:8px 0"><button type="button" class="btn" id="aeImport">파일로 넣기 열기</button></div></div>
+      <details style="margin-top:8px"><summary class="note" style="cursor:pointer">보낼 내용 미리보기</summary><textarea class="export" readonly style="min-height:260px;margin-top:6px">${esc(txt)}</textarea></details>
+    </div>`, {narrow:true});
+  $('#aeDl',ov).addEventListener('click', ()=>saveTextFile(fname, txt));
+  $('#aeCopy',ov).addEventListener('click', async ()=>{ if(!(await copyText(txt))){ const ta=$('textarea',ov); ta.select(); try{ document.execCommand('copy'); toast('복사했습니다'); }catch(_){ toast('미리보기를 열어 직접 선택해 복사해 주세요'); } } });
+  $('#aeImport',ov).addEventListener('click', ()=>{ closeModal(ov); openImportPromo(); });
 }
 
 /* ---------------- 캘린더 이벤트 (위임) ---------------- */
@@ -1692,6 +1711,11 @@ function openProducts(opts){
 const IMPORT_FORMAT = 'lifemeal-md-board/promotion';
 function buildPromptText(ctx){
   ctx=ctx||{};
+  const L=_buildPromptHead(ctx);
+  _buildPromptTail(L, ctx);
+  return L.join('\n');
+}
+function _buildPromptHead(ctx){
   const L=[];
   L.push('# 라이프밀 MD 프로모션 보드 - 기획전 설계 프롬프트');
   L.push(`생성일 ${todayISO()} · 이 파일은 라이프밀 MD 대시보드가 만든 기획전 설계용 프롬프트입니다.`);
@@ -1716,6 +1740,14 @@ function buildPromptText(ctx){
   L.push('- 상태는 아래 진행 상태 목록 중 하나를 쓰고, 새 기획이면 보통 "아이디어" 또는 "검토 중"으로 둡니다.');
   L.push('');
   L.push('## 참고 데이터');
+  refDataLines(L);
+  L.push('### 현재 등록된 기획전 (채널 | 기획전명 | 기간 | 상태) - 겹침 확인용');
+  const live = S.promotions.filter(p=>!p.archived && p.status!=='취소').sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+  if(!live.length) L.push('- (없음)');
+  live.forEach(p=>{ const ch=byId(S.channels,p.channelId); L.push(`- ${ch?ch.name:'-'} | ${p.name} | ${p.start}~${p.end} | ${p.status}`); });
+  return L;
+}
+function refDataLines(L){
   L.push('### 판매 채널 (id | 채널명 | 성격)');
   sorted(S.channels).filter(c=>c.active!==false).forEach(c=>L.push(`- ${c.id} | ${c.name} | ${c.desc||''}`));
   L.push('### 기획전 기준 (id | 기준명 | 설명) - 복수 선택');
@@ -1731,10 +1763,8 @@ function buildPromptText(ctx){
     const comp = p.type==='set' ? ' | 구성: '+(p.components||[]).map(c=>c.productId+' x '+c.qty).join(', ') : '';
     L.push(`- ${p.id} | ${PRODUCT_TYPES[p.type]} | ${p.name} | ${p.spec||''} | ${fmt(masterPrice(p))} | ${fmt(p.cost)}${p.note?' | '+p.note:''}${comp}`);
   });
-  L.push('### 현재 등록된 기획전 (채널 | 기획전명 | 기간 | 상태) - 겹침 확인용');
-  const live = S.promotions.filter(p=>!p.archived && p.status!=='취소').sort((a,b)=>(a.start||'').localeCompare(b.start||''));
-  if(!live.length) L.push('- (없음)');
-  live.forEach(p=>{ const ch=byId(S.channels,p.channelId); L.push(`- ${ch?ch.name:'-'} | ${p.name} | ${p.start}~${p.end} | ${p.status}`); });
+}
+function _buildPromptTail(L, ctx){
   L.push('');
   L.push('## 출력 형식 (JSON) - 이 구조를 그대로 지킵니다');
   L.push('```json');
@@ -1760,11 +1790,36 @@ function buildPromptText(ctx){
   L.push('```');
   L.push('필드 설명: products[].price는 정상 단가를 바꿔야 할 때만 넣습니다(기본은 마스터 단가). discount.type이 price면 value가 행사가입니다. checklist는 이름 배열 또는 {name, done} 배열 모두 가능합니다. 모든 금액은 원 단위 정수입니다. 하나의 파일에 기획전을 여러 개 넣어도 됩니다.');
   if(ctx.draft && ctx.draft.name){ L.push(''); L.push('## 현재 작성 중인 기획전 (참고)'); L.push(JSON.stringify(exportPromotionJSON(ctx.draft), null, 2)); }
+}
+// 기획전 1건 수정용 프롬프트: 현재 내용 + 참고 데이터 + 같은 형식으로 돌려 달라는 지시
+function buildEditPromptText(p){
+  const n=normalizePromotion(p); const ch=byId(S.channels,n.channelId);
+  const L=[];
+  L.push(`# 라이프밀 기획전 수정 요청 - ${n.name}`);
+  L.push(`생성일 ${todayISO()} · 라이프밀 MD 프로모션 보드에서 내보낸 파일입니다.`);
+  L.push('');
+  L.push('## 할 일');
+  L.push('아래 "현재 기획전" JSON이 지금 보드에 등록된 내용입니다. 사용자가 무엇을 바꾸고 싶은지 말하면(예: 상품 구성, 행사가, 혜택, 기간, 테마), 그 부분만 고치고 나머지는 유지해서 같은 형식의 JSON 하나로 다시 출력하세요.');
+  L.push('- id 값은 절대 바꾸지 마세요. 보드가 id로 기존 기획전을 찾아 덮어씁니다.');
+  L.push('- 상품은 참고 데이터의 productId를 쓰고, 마스터에 없으면 name만 적습니다. 행사가는 discount {type: pct|amt|price, value}로 표현합니다.');
+  L.push('- 예산(goal)은 이 기획전을 위해 추가로 투입하는 비용만 넣습니다. 할인에 따른 매출 감소분, 기존 재고 사은품 원가, 판매 수수료는 0으로 둡니다.');
+  L.push('- theme은 테마·키워드 한 줄, benefit은 고객 혜택 한 문장입니다. 질병 예방·치료 효능 표현과 최상급 표현은 쓰지 않습니다.');
+  L.push('- 사용자가 아직 지시를 하지 않았다면, 이 기획전에서 비어 있거나 "미정"인 부분(상품 구성, 혜택 수준, 테마)을 먼저 짚어 주고 무엇을 정해야 하는지 3~5개 질문으로 물어보세요.');
+  L.push('- 최종 결과는 JSON 코드 블록 하나만 출력하고 파일명은 기획전_' + n.name.replace(/[\\/:*?"<>|]/g,'_') + '.json 으로 제공합니다.');
+  L.push('');
+  L.push('## 현재 기획전');
+  L.push(`채널: ${ch?ch.name:'-'} · 기간: ${n.start}~${n.end} · 상태: ${n.status}`);
+  L.push('```json');
+  L.push(JSON.stringify({format:IMPORT_FORMAT, version:1, promotions:[exportPromotionJSON(n)]}, null, 2));
+  L.push('```');
+  L.push('');
+  L.push('## 참고 데이터');
+  refDataLines(L);
   return L.join('\n');
 }
 function exportPromotionJSON(p){ // 대시보드 → 파일 형식
   const n = normalizePromotion(p);
-  return { name:n.name, channel:n.channelId, start:n.start, end:n.end, status:n.status, owner:n.owner, deadline:n.deadline, criteria:n.criteriaIds, purposes:n.purposeIds, background:n.bg, target:n.target,
+  return { id:n.id||undefined, name:n.name, theme:n.theme||'', channel:n.channelId, start:n.start, end:n.end, status:n.status, owner:n.owner, deadline:n.deadline, criteria:n.criteriaIds, purposes:n.purposeIds, background:n.bg, target:n.target,
     products: n.products.map(l=> l.kind==='event' ? {type:'event', productId:l.productId||undefined, name:l.name, qtyPerOrder:num(l.qty)||1, cost:num(l.cost), condition:l.cond, stock:l.stock===''?undefined:num(l.stock)} : {type:l.kind, productId:l.productId&&l.productId!=='__manual'?l.productId:undefined, name:l.name, comp:l.comp, components:l.kind==='set'?(l.components||[]).map(c=>({productId:c.productId,qty:num(c.qty)||1})):undefined, price:num(l.price), discount:{type:l.discType||'price', value: l.discType==='price'?lineSalePrice(l):num(l.discVal)}, stock:l.stock===''?undefined:num(l.stock), targetQty:l.qty===''?undefined:num(l.qty)}),
     gift:n.gift, coupon:n.coupon, benefit:n.benefit, goal:Object.fromEntries(Object.keys(n.goal).map(k=>[k,num(n.goal[k])])), checklist:n.checklist.map(c=>({name:c.name,done:!!c.done})), memo:n.memo, links:n.links.map(l=>({title:l.title,url:l.url})), contact:n.contact };
 }
@@ -1795,7 +1850,7 @@ function importOne(src, warnings, pending){ // src: 파일 형식 한 건 → �
   if(okDate(src.end)) d.end=src.end; else { d.end=addDays(d.start,6); warnings.push('종료일 형식이 잘못되어 시작일 + 6일로 넣습니다.'); }
   if(d.end<d.start){ d.end=d.start; warnings.push('종료일이 시작일보다 빨라 시작일과 같게 맞췄습니다.'); }
   d.status = STATUSES.includes(src.status)?src.status:'아이디어'; if(src.status && !STATUSES.includes(src.status)) warnings.push(`상태 "${src.status}"는 목록에 없어 아이디어로 넣습니다.`);
-  d.owner = String(src.owner||''); d.deadline = okDate(src.deadline)?src.deadline:'';
+  d.owner = String(src.owner||''); d.deadline = okDate(src.deadline)?src.deadline:''; d.theme = String(src.theme||''); d._srcId = src.id && S.promotions.some(p=>p.id===src.id) ? src.id : null;
   const mapTerms = (arr, list, kind)=> (Array.isArray(arr)?arr:[]).map(v=>{ const f=findByIdOrName(list, v); if(f) return f.id; const name=String(v||'').trim(); if(!name) return null; const key=kind+':'+name; if(!pending[key]) pending[key]={kind,name}; return key; }).filter(Boolean);
   d.criteriaIds = mapTerms(src.criteria||src.criteriaIds, S.criteria, 'criteria');
   d.purposeIds = mapTerms(src.purposes||src.purposeIds, S.purposes, 'purposes');
@@ -1856,20 +1911,21 @@ function openImportPromo(opts){ // opts.onDraft: 폼에 채우기 모드
     const pending={}; const items = list.map(src=>{ const warnings=[]; const d=importOne(src, warnings, pending); return {d,warnings}; });
     if(opts.onDraft && items.length>1) items.splice(1);
     P.innerHTML = `<div class="preview-box" style="margin-bottom:10px"><span>기획전 <b>${items.length}</b>건</span>${Object.keys(pending).length?`<span class="warn" style="color:var(--warn)">새로 등록될 기준·목적 ${Object.keys(pending).length}개: ${Object.values(pending).map(x=>x.name).join(', ')}</span>`:''}</div>` +
-      items.map(({d,warnings},i)=>{ const ch=byId(S.channels,d.channelId); const b=budgetOf(d); const sp=spanOf(d); const dup=S.promotions.find(p=>!p.archived && p.name===d.name && p.channelId===d.channelId);
+      items.map(({d,warnings},i)=>{ const ch=byId(S.channels,d.channelId); const b=budgetOf(d); const sp=spanOf(d); const dup=(d._srcId && S.promotions.find(p=>p.id===d._srcId)) || S.promotions.find(p=>!p.archived && p.name===d.name && p.channelId===d.channelId);
         return `<div class="imp-item"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(d.name)}</b>${statusPill(d.status)}<span class="note">${esc(ch?ch.name:'-')} · ${d.start} ~ ${d.end}${sp?` · ${WEEKS[sp.a].month}월 ${WEEKS[sp.a].week}주차${sp.b!==sp.a?` ~ ${WEEKS[sp.b].month}월 ${WEEKS[sp.b].week}주차`:''}`:' · 캘린더 범위 밖'}</span></div>
           <div class="note" style="margin-top:4px">상품 ${saleLines(d).length}개 · 이벤트 ${giftLines(d).length}개 · 기준 ${d.criteriaIds.length} · 목적 ${d.purposeIds.length} · 총예산 ${won(b.total)} · 목표 매출 ${won(b.sales)}${b.roas!=null?' · ROAS '+b.roas.toFixed(1)+'배':''}</div>
           ${saleLines(d).map(l=>`<div class="note">- ${esc(l.name||'(상품명 없음)')} ${l.comp?'('+esc(l.comp)+')':''} 정상 ${fmt(l.price)}원 → 행사가 ${fmt(lineSalePrice(l))}원${l.qty?' · 목표 '+fmt(l.qty)+'개':''}</div>`).join('')}
           ${warnings.map(w=>`<div class="warn">! ${esc(w)}</div>`).join('')}
-          ${dup && !opts.onDraft ? `<label class="chk" style="margin-top:6px"><input type="checkbox" data-ow="${i}" checked> 같은 채널에 같은 이름의 기획전이 있습니다 - 덮어쓰기 (해제하면 새로 추가)</label>`:''}
+          ${dup && !opts.onDraft ? `<label class="chk" style="margin-top:6px"><input type="checkbox" data-ow="${i}" checked> ${d._srcId?`기존 기획전 "${esc(dup.name)}"을 이 내용으로 업데이트`:'같은 채널에 같은 이름의 기획전이 있습니다 - 덮어쓰기'} (해제하면 새로 추가)</label>`:''}
         </div>`; }).join('') +
       `<div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn primary" id="ipGo">${opts.onDraft?'이 내용으로 등록창 채우기':`기획전 ${items.length}건 등록`}</button><button type="button" class="btn ghost" data-close>취소</button></div>`;
     $('#ipGo',ov).addEventListener('click', async ()=>{
       const owFlags = {}; $$('[data-ow]',P).forEach(cb=>owFlags[cb.dataset.ow]=cb.checked);
       for(let i=0;i<items.length;i++){ const {d}=items[i]; await resolvePending(pending, d);
         if(opts.onDraft){ opts.onDraft(d); closeModal(ov); toast('등록창에 채웠습니다. 확인 후 등록을 누르세요.'); return; }
-        const dup=S.promotions.find(p=>!p.archived && p.name===d.name && p.channelId===d.channelId);
+        const dup=(d._srcId && S.promotions.find(p=>p.id===d._srcId)) || S.promotions.find(p=>!p.archived && p.name===d.name && p.channelId===d.channelId);
         if(dup && owFlags[i]!==false && owFlags[i]!==undefined){ d.id=dup.id; d.createdAt=dup.createdAt||d.createdAt; } else d.id=uid('pr');
+        delete d._srcId;
         d.updatedAt=new Date().toISOString(); await S.store.put('promotions', clone(d)); }
       closeModal(ov); toast(`기획전 ${items.length}건을 등록했습니다`);
     });
