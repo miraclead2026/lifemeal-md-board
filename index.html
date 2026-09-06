@@ -194,26 +194,37 @@ body:not(.report) #report{display:none}
 .rp-head .lg{display:flex;gap:14px;align-items:center;font-size:12.5px;color:var(--text);margin-left:8px}
 .rp-head .lg i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-3px;margin-right:5px;border:1px solid transparent}
 .rp-head .acts{margin-left:auto;display:flex;gap:6px}
+.rp-head .mtabs{display:flex;gap:4px;margin-left:14px}
+.rp-head .mtabs button{font:inherit;font-size:12.5px;padding:4px 10px;border:1px solid var(--line);background:var(--surface);border-radius:4px;cursor:pointer;color:var(--muted)}
+.rp-head .mtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 .rp-scroll{overflow:auto;max-height:calc(100vh - 150px)}
-.wtable{border-collapse:separate;border-spacing:0;min-width:100%;table-layout:fixed;font-size:13.5px}
-.wtable th.ch{width:var(--cw,210px);min-width:var(--cw,210px)}
+.wtable{border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:13px}
+.wtable col.cch{width:160px}
+.wtable col.cwk{width:var(--ww,170px)}
+.wtable.fit col.cwk{width:auto}
 .wtable th,.wtable td{border-right:1px solid #D9DEE6;border-bottom:1px solid #D9DEE6;vertical-align:top}
-.wtable thead th{position:sticky;top:0;z-index:5;background:#EEF2F7;color:var(--text);font-weight:700;font-size:14px;text-align:left;padding:10px 12px;border-bottom:2px solid #B9C2CF}
-.wtable thead th .d{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:1px}
-.wtable th.wc,.wtable td.wc{position:sticky;left:0;z-index:4;background:#F7F9FC;width:120px;min-width:120px;border-right:2px solid #B9C2CF}
-.wtable thead th.wc{z-index:6;background:#EEF2F7}
-.wtable td.wc{padding:10px 12px}
-.wtable td.wc .w{font-size:14.5px;font-weight:700;display:block}
-.wtable td.wc .r{font-size:12px;color:var(--muted);display:block;margin-top:2px}
-.wtable th.cc,.wtable td.cc{width:64px;min-width:64px;text-align:center}
-.wtable td.cc{font-size:14px;font-weight:600;color:var(--muted);padding-top:12px}
-.wtable td.cc.over{color:var(--danger)}
-.wtable td.cc.full{color:var(--warn)}
-.wtable tr.mrow td{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:15px;padding:8px 12px;position:sticky;left:0;border-bottom:1px solid #B9C2CF}
-.wtable td.cell{padding:6px 6px;min-height:64px;height:64px;cursor:pointer;position:relative}
+.wtable thead th{position:sticky;z-index:5;background:#EEF2F7;color:var(--text);font-weight:700;text-align:left;padding:8px 10px;box-sizing:border-box}
+.wtable thead tr.hm th{top:0;height:36px;font-size:14.5px;color:var(--accent);background:var(--accent-soft);border-bottom:1px solid #B9C2CF;text-align:center;padding:8px 10px}
+.wtable thead tr.hm th .d{display:inline;font-size:12px;color:var(--muted);font-weight:400;margin-left:8px}
+.wtable thead tr.hw th{top:36px;font-size:13.5px;border-bottom:2px solid #B9C2CF}
+.wtable thead th .d{display:block;font-size:11.5px;color:var(--muted);font-weight:400;margin-top:1px}
+.wtable th.chc,.wtable td.chc{position:sticky;left:0;z-index:4;background:#F7F9FC;width:160px;min-width:160px;border-right:2px solid #B9C2CF;padding:10px 12px;text-align:left}
+.wtable thead th.chc{z-index:6;background:#EEF2F7;vertical-align:middle}
+.wtable td.chc .w{font-size:14.5px;font-weight:700;display:block}
+.wtable td.chc .r{font-size:12px;color:var(--muted);display:block;margin-top:3px;font-weight:400;white-space:normal;line-height:1.4}
+.wtable td.chc .r.ds{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:11.5px}
+.wtable td.ms,.wtable th.ms{border-left:2px solid #B9C2CF}
+.wtable tr.chlast td{border-bottom:2px solid #B9C2CF}
+.wtable td.cell{padding:5px;height:58px;cursor:pointer;position:relative}
 .wtable td.cell:hover{background:#FBFCFE}
-.wtable td.cell .add{position:absolute;right:6px;bottom:6px;font-size:12px;color:var(--faint);border:1px dashed var(--line);border-radius:4px;padding:2px 7px;background:var(--surface);opacity:0;pointer-events:none}
+.wtable td.cell .add{position:absolute;right:5px;bottom:5px;font-size:11.5px;color:var(--faint);border:1px dashed var(--line);border-radius:4px;padding:1px 6px;background:var(--surface);opacity:0;pointer-events:none}
 .wtable td.cell:hover .add{opacity:1}
+.wtable td.bar{padding:5px}
+.wtable tr.cnt td{background:#F7F9FC;text-align:center;font-weight:700;color:var(--muted);font-size:13.5px;padding:8px 4px;position:sticky;bottom:0;z-index:3;border-top:2px solid #B9C2CF}
+.wtable tr.cnt td.chc{z-index:5}
+.wtable tr.cnt td.chc .r{display:block;font-size:11.5px;font-weight:400;margin-top:2px}
+.wtable tr.cnt td.over{color:var(--danger)}
+.wtable tr.cnt td.full{color:var(--warn)}
 .pb{border:1px solid #E5C48F;border-left:5px solid #F59E0B;background:#FFF4E2;border-radius:6px;padding:7px 9px;margin:0 0 5px;cursor:pointer;line-height:1.35}
 .pb:hover{filter:brightness(.98)}
 .pb.live{border-color:#9AD6B1;border-left-color:#16A34A;background:#E9F7EE}
@@ -222,14 +233,20 @@ body:not(.report) #report{display:none}
 .pb .nm{font-weight:700;font-size:13.5px;color:var(--text);display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
 .pb .tag{font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:3px;background:#EEF1F5;color:#5B6472;white-space:nowrap}
 .pb.draft .tag{background:#F3F4F6;color:#6B7280}
-.pb .th{font-size:12px;color:#92400E;margin-top:2px;white-space:normal}
+.pb .th{font-size:12px;color:#92400E;margin-top:2px;white-space:normal;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .pb.draft .th{color:#6B7280}
-.pb .pd{font-size:12.5px;color:#3D4756;margin-top:3px;white-space:normal}
-.pb .bf{font-size:12px;color:var(--muted);margin-top:2px;white-space:normal}
+.pb .pd{font-size:12.5px;color:#3D4756;margin-top:3px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pb .bf{font-size:12px;color:var(--muted);margin-top:2px;white-space:normal;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .pb.cont{padding:4px 9px;background:transparent;border-style:dashed;border-left-style:solid;opacity:.85}
 .pb.cont .nm{font-size:12.5px;font-weight:600;color:var(--muted)}
+.pb .rg{font-size:11.5px;color:var(--muted);font-weight:500;white-space:nowrap}
+.pb .nm .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pb.n1 .bf{display:none}
+.pb.n1 .nm .t{font-size:13px}
+.pb.cutL{border-left-style:dashed;border-left-width:3px}
+.pb.cutR{border-right-style:dashed}
 .rp-note{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:10px 18px;border-top:1px solid #CBD2DC;background:#FFFBEB;color:#92400E;font-size:12.5px;line-height:1.5}
-@media print{ body.report .topbar{display:none!important} body.report .report{margin:0;border:0} .rp-scroll{max-height:none;overflow:visible} .rp-head .acts{display:none} .wtable td.cell .add{display:none} }
+@media print{ @page{size:landscape} body.report .topbar{display:none!important} body.report .report{margin:0;border:0} .rp-scroll{max-height:none;overflow:visible} .rp-head .acts,.rp-head .mtabs{display:none} .wtable td.cell .add{display:none} .wtable{width:100%!important} .wtable col.cwk{width:auto} }
 /* compact detail */
 .dtag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:3px;background:#EEF1F5;color:#5B6472;vertical-align:middle;margin-left:6px}
 .dtag.live{background:#E9F7EE;color:#166534}.dtag.fix{background:#FFF4E2;color:#92400E}.dtag.draft{background:#F3F4F6;color:#6B7280;border:1px dashed #AAB3C0}
@@ -931,31 +948,46 @@ function renderReport(){
   const rows = S.promotions.filter(p=>!p.archived && p.status!=='취소').map(p=>Object.assign({},p,{_sp:spanOf(p)})).filter(p=>p._sp);
   const chans = sorted(S.channels).filter(c=> c.active!==false && (CORE_CHANNELS.includes(c.id) || rows.some(p=>p.channelId===c.id)));
   const n = {fix:0,live:0,done:0,draft:0}; rows.forEach(p=>{ n[REPORT_GROUP[p.status]||'draft']++; });
-  let h = `<div class="rp-head"><div><h2>라이프밀 프로모션 계획 ${YEAR}년 9~12월</h2><div class="sub">주차별 · 채널별로 어떤 기획전을 어떤 상품으로 진행하는지 · 기준일 ${todayISO()}</div></div>
+  const md = (s)=> s ? `${Number(s.slice(5,7))}/${Number(s.slice(8,10))}` : '';
+  const mFilter = Number(S.rpMonth||0);
+  const vis = WEEKS.filter(w=>!mFilter || w.month===mFilter); const wa=vis[0].idx, wb=vis[vis.length-1].idx;
+  const months = []; vis.forEach(w=>{ const m=months[months.length-1]; if(m && m.month===w.month) m.n++; else months.push({month:w.month, n:1}); });
+  let h = `<div class="rp-head"><div><h2>라이프밀 프로모션 계획 ${YEAR}년 9~12월</h2><div class="sub">채널별 · 주차별로 어떤 기획전을 어떤 상품으로 진행하는지 · 기준일 ${todayISO()}</div></div>
     <div class="lg"><span><i style="background:#E9F7EE;border-color:#16A34A"></i>진행 중 ${n.live}</span><span><i style="background:#FFF4E2;border-color:#F59E0B"></i>확정 ${n.fix}</span><span><i style="background:#fff;border:1px dashed #AAB3C0"></i>초안 ${n.draft}</span>${n.done?`<span><i style="background:#F1F3F6;border-color:#9CA3AF"></i>완료 ${n.done}</span>`:''}</div>
+    <div class="mtabs">${[[0,'전체'],[9,'9월'],[10,'10월'],[11,'11월'],[12,'12월']].map(([m,l])=>`<button type="button" data-m="${m}" class="${m===mFilter?'on':''}">${l}</button>`).join('')}</div>
     <div class="acts"><button type="button" class="btn sm primary" id="rpAdd">+ 기획전 추가</button><button type="button" class="btn sm" id="rpImg">이미지로 저장</button><button type="button" class="btn sm" id="rpPrint">인쇄 · PDF</button></div></div>`;
-  h += `<div class="rp-scroll"><table class="wtable"><thead><tr><th class="wc">주차</th>`;
-  chans.forEach(c=>{ h += `<th class="ch" title="${esc(c.desc||'')}">${esc(c.name)}</th>`; });
-  h += `<th class="cc">동시<span class="d">최대 ${CONCURRENT_MAX}</span></th></tr></thead><tbody>`;
-  let curM=null;
-  WEEKS.forEach(w=>{
-    if(w.month!==curM){ curM=w.month; const mn = rows.filter(p=>WEEKS[p._sp.a].month===w.month).length; h += `<tr class="mrow"><td colspan="${chans.length+2}">${YEAR}년 ${w.month}월 <span style="font-weight:400;font-size:12.5px;color:var(--muted);margin-left:8px">이달 시작 기획전 ${mn}건</span></td></tr>`; }
-    h += `<tr><td class="wc"><span class="w">${w.month}월 ${w.week}주</span><span class="r">${w.range.replace('~',' ~ ')}</span></td>`;
-    chans.forEach(c=>{
-      const items = rows.filter(p=>p.channelId===c.id && w.idx>=p._sp.a && w.idx<=p._sp.b).sort((a,b)=>a._sp.a-b._sp.a);
-      h += `<td class="cell" data-ch="${c.id}" data-w="${w.idx}">`;
-      items.forEach(p=>{ const g=REPORT_GROUP[p.status]||'draft'; const first = w.idx===p._sp.a; const pd=reportProduct(p);
-        if(first) h += `<div class="pb ${g}" data-id="${p.id}"><div class="nm">${esc(p.name)}<span class="tag">${REPORT_LABEL[g]}</span>${p._sp.b>p._sp.a?`<span class="tag">~${WEEKS[p._sp.b].month}월 ${WEEKS[p._sp.b].week}주</span>`:''}</div>${p.theme?`<div class="th">${esc(p.theme)}</div>`:''}${pd?`<div class="pd">${esc(pd)}</div>`:'<div class="pd" style="color:var(--faint)">상품 미정</div>'}${p.benefit?`<div class="bf">${esc(p.benefit)}</div>`:''}</div>`;
-        else h += `<div class="pb ${g} cont" data-id="${p.id}"><div class="nm">${esc(p.name)} <span class="tag">계속</span></div></div>`; });
-      h += `<span class="add">+ 추가</span></td>`;
+  h += `<div class="rp-scroll"><table class="wtable ${mFilter?'fit':''}" style="width:${mFilter?'100%':(160+170*vis.length)+'px'}"><colgroup><col class="cch">${vis.map(()=>'<col class="cwk">').join('')}</colgroup><thead><tr class="hm"><th class="chc" rowspan="2">채널</th>`;
+  months.forEach(m=>{ const mn = rows.filter(p=>WEEKS[p._sp.a].month===m.month).length; h += `<th colspan="${m.n}" class="ms">${YEAR}년 ${m.month}월<span class="d">이달 시작 기획전 ${mn}건</span></th>`; });
+  h += `</tr><tr class="hw">`;
+  vis.forEach(w=>{ h += `<th class="wk ${w.week===1?'ms':''}">${w.month}월 ${w.week}주<span class="d">${w.range.replace('~',' ~ ')}</span></th>`; });
+  h += `</tr></thead><tbody>`;
+  const box = (x)=>{ const p=x.p; const g=REPORT_GROUP[p.status]||'draft'; const pd=reportProduct(p); const cutL=p._sp.a<x.a, cutR=p._sp.b>x.b;
+    return `<div class="pb ${g} ${cutL?'cutL':''} ${cutR?'cutR':''} ${x.b===x.a?'n1':''}" data-id="${p.id}" title="${esc(p.name)}${p.benefit?' · '+esc(p.benefit):''}"><div class="nm"><span class="t">${cutL?'◀ ':''}${esc(p.name)}</span><span class="tag">${REPORT_LABEL[g]}</span><span class="rg">${md(p.start)}~${md(p.end)}${cutR?' ▶':''}</span></div>${p.theme?`<div class="th">${esc(p.theme)}</div>`:''}${pd?`<div class="pd">${esc(pd)}</div>`:'<div class="pd" style="color:var(--faint)">상품 미정</div>'}${p.benefit?`<div class="bf">${esc(p.benefit)}</div>`:''}</div>`; };
+  chans.forEach(c=>{
+    const all = rows.filter(p=>p.channelId===c.id);
+    const items = all.map(p=>({p, a:Math.max(p._sp.a,wa), b:Math.min(p._sp.b,wb)})).filter(x=>x.b>=x.a).sort((x,y)=>x.a-y.a || y.b-x.b);
+    const lanes=[]; items.forEach(x=>{ let L=lanes.find(l=>l.end<x.a); if(!L){ L={end:-1,items:[]}; lanes.push(L); } L.items.push(x); L.end=x.b; });
+    if(!lanes.length) lanes.push({end:-1,items:[]});
+    lanes.forEach((L,li)=>{
+      h += `<tr class="lane ${li===lanes.length-1?'chlast':''}">`;
+      if(li===0) h += `<td class="chc" rowspan="${lanes.length}"><span class="w">${esc(c.name)}</span>${c.desc?`<span class="r ds" title="${esc(c.desc)}">${esc(c.desc)}</span>`:''}<span class="r">${mFilter?`${items.length}건 (이달)`:`${all.length}건`}</span></td>`;
+      const byStart = new Map(L.items.map(x=>[x.a,x]));
+      let w=wa;
+      while(w<=wb){ const x=byStart.get(w); const ms = WEEKS[w].week===1?'ms':'';
+        if(x){ h += `<td class="bar ${ms}" colspan="${x.b-x.a+1}">${box(x)}</td>`; w=x.b+1; }
+        else { h += `<td class="cell ${ms}" data-ch="${c.id}" data-w="${w}"><span class="add">+ 추가</span></td>`; w++; }
+      }
+      h += `</tr>`;
     });
-    const cnt=counts[w.idx]; h += `<td class="cc ${cnt>=CONCURRENT_LIMIT?'over':(cnt===CONCURRENT_MAX?'full':'')}">${cnt||''}</td></tr>`;
   });
-  h += `</tbody></table></div>`;
-  h += `<div class="rp-note"><span>읽는 법: 한 줄이 한 주, 한 칸이 한 채널입니다. 칸 안의 상자가 그 주에 그 채널에서 진행하는 기획전이고 아래 줄이 판매 상품입니다.</span><span>점선 상자(초안)는 9/4 회의 내용으로 잡아 둔 검토안이며 확정 전입니다. 빈 칸을 누르면 바로 추가, 상자를 누르면 내용 확인·수정.</span></div>`;
+  h += `<tr class="cnt"><td class="chc">동시 진행<span class="r">주당 최대 ${CONCURRENT_MAX}건 기준</span></td>`;
+  vis.forEach(w=>{ const cnt=counts[w.idx]; h += `<td class="${cnt>=CONCURRENT_LIMIT?'over':(cnt===CONCURRENT_MAX?'full':'')} ${w.week===1?'ms':''}">${cnt||''}</td>`; });
+  h += `</tr></tbody></table></div>`;
+  h += `<div class="rp-note"><span>읽는 법: 한 줄이 한 채널, 한 칸이 한 주입니다. 가로로 이어진 상자가 그 채널에서 진행하는 기획전과 기간이고, 상자 안 아래 줄이 판매 상품입니다. 한 채널에 기획전이 겹치면 줄이 늘어납니다.</span><span>점선 상자(초안)는 9/4 회의 내용으로 잡아 둔 검토안이며 확정 전입니다. 위 월 버튼으로 한 달씩 볼 수 있고, 빈 칸을 누르면 바로 추가, 상자를 누르면 내용 확인·수정.</span></div>`;
   const R = $('#report'); R.innerHTML = h;
   $$('.pb[data-id]',R).forEach(el=>el.addEventListener('click', e=>{ e.stopPropagation(); openDetail(el.dataset.id); }));
   $$('td.cell',R).forEach(td=>td.addEventListener('click', ()=>openQuickForm({channelId:td.dataset.ch, weekIdx:Number(td.dataset.w)})));
+  $$('.mtabs button',R).forEach(b=>b.addEventListener('click', ()=>{ S.rpMonth=Number(b.dataset.m); try{ sessionStorage.setItem('mdboard-rpmonth', String(S.rpMonth)); }catch(_){ } renderReport(); }));
   $('#rpAdd',R).addEventListener('click', ()=>openQuickForm({}));
   $('#rpPrint',R).addEventListener('click', ()=>window.print());
   $('#rpImg',R).addEventListener('click', saveReportImage);
@@ -1006,8 +1038,11 @@ async function saveReportImage(){
   try{
     if(!window.html2canvas){ await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
     const acts = $('.rp-head .acts',R); acts.style.visibility='hidden';
-    const canvas = await html2canvas(R, {scale:2, backgroundColor:'#ffffff', windowWidth: R.scrollWidth+60, scrollX:0, scrollY:0});
-    acts.style.visibility='';
+    const sc = $('.rp-scroll',R); const tbl=$('.wtable',R); const tw = Math.max(R.clientWidth, (tbl?tbl.scrollWidth:0)+2);
+    const prev = {ov:sc.style.overflow, mh:sc.style.maxHeight, w:R.style.width};
+    sc.style.overflow='visible'; sc.style.maxHeight='none'; R.style.width=tw+'px';
+    let canvas; try{ canvas = await html2canvas(R, {scale:2, backgroundColor:'#ffffff', windowWidth: tw+80, scrollX:0, scrollY:0}); }
+    finally{ sc.style.overflow=prev.ov; sc.style.maxHeight=prev.mh; R.style.width=prev.w; acts.style.visibility=''; }
     const a=document.createElement('a'); a.href=canvas.toDataURL('image/png'); a.download=`라이프밀_프로모션계획_${todayISO()}.png`; document.body.appendChild(a); a.click(); a.remove(); toast('이미지를 저장했습니다');
   }catch(e){ console.warn(e); toast('이미지 저장이 막힌 환경입니다. 인쇄 · PDF를 이용해 주세요.'); }
 }
@@ -1935,7 +1970,7 @@ function openImportPromo(opts){ // opts.onDraft: 폼에 채우기 모드
 /* ---------------- 상단 · 필터 이벤트 ---------------- */
 $('#btnNew').addEventListener('click', ()=>openForm(newPromotion({})));
 $('#btnMode').addEventListener('click', ()=>setMode(S.mode==='report'?'work':'report'));
-try{ const mm=sessionStorage.getItem('mdboard-mode'); if(mm==='work') S.mode='work'; }catch(_){ }
+try{ const mm=sessionStorage.getItem('mdboard-mode'); if(mm==='work') S.mode='work'; const rm=Number(sessionStorage.getItem('mdboard-rpmonth')||0); if([9,10,11,12].includes(rm)) S.rpMonth=rm; }catch(_){ }
 document.body.classList.toggle('report', S.mode==='report'); $('#btnMode').textContent = S.mode==='report' ? '작업 화면 열기' : '보고 화면으로';
 $('#btnCriteria').addEventListener('click', ()=>openSettings('criteria'));
 $('#btnProducts').addEventListener('click', ()=>openProducts());
